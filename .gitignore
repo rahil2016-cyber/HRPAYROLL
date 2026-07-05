@@ -1,0 +1,40 @@
+# Dependency directories
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+.cache/
+
+# Local databases (SQLite)
+backend/database.sqlite
+*.db
+*.sqlite
+*.sqlite3
+
+# Local/secrets configurations
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
+# Logs and system files
+*.log
+logs/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE directories
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.pdf
+
