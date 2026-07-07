@@ -78,15 +78,31 @@ export default function Layout({ user, children, onLogout }) {
         className="sidebar-main"
       >
         <style>{`
+          .content-area {
+            width: 100%;
+            max-width: 100%;
+          }
+          .main-content-wrapper {
+            flex: 1;
+            padding: 1.5rem 1.5rem 3rem 1.5rem;
+            overflow-y: auto;
+          }
           @media (min-width: 1025px) {
             .sidebar-main {
               transform: translateX(0) !important;
             }
             .content-area {
+              width: calc(100% - 260px) !important;
+              max-width: calc(100% - 260px) !important;
               margin-left: 260px !important;
             }
             .hamburger-btn {
               display: none !important;
+            }
+          }
+          @media (max-width: 500px) {
+            .main-content-wrapper {
+              padding: 1rem 0.75rem 2rem 0.75rem !important;
             }
           }
         `}</style>
@@ -273,7 +289,7 @@ export default function Layout({ user, children, onLogout }) {
         </header>
 
         {/* Main Routed Children views */}
-        <main style={{ flex: 1, padding: '1.5rem 1.5rem 3rem 1.5rem', overflowY: 'auto' }}>
+        <main className="main-content-wrapper">
           {children}
         </main>
       </div>

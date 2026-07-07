@@ -238,6 +238,177 @@ elseif ($action === 'announcements') {
     }
 }
 
+elseif (strpos($action, 'attendance') === 0) {
+    $parts = explode('/', $action);
+    if (count($parts) > 1 && is_numeric($parts[1])) {
+        // GET /api/hr/attendance/{id}
+        $attendance_id = (int)$parts[1];
+        $stmt = $db->prepare("SELECT a.*, u.name as employee_name, u.avatar, e.employee_code,
+                                     d.name as department_name, ds.name as designation_name,
+                                     b.name as branch_name, b.latitude as office_lat, b.longitude as office_lng, b.radius_meters as office_radius
+                              FROM attendance a
+                              JOIN employees e ON a.employee_id = e.id
+                              JOIN users u ON e.user_id = u.id
+                              LEFT JOIN departments d ON e.department_id = d.id
+                              LEFT JOIN designations ds ON e.designation_id = ds.id
+                              LEFT JOIN branches b ON e.branch_id = b.id
+                              WHERE a.id = ? AND e.company_id = ?");
+        $stmt->execute([$attendance_id, $company_id]);
+        $record = $stmt->fetch();
+
+        if (!$record) {
+            hrResponse(404, ['error' => 'Attendance record not found']);
+        }
+
+        $logStmt = $db->prepare("SELECT * FROM attendance_logs WHERE attendance_id = ? ORDER BY timestamp ASC");
+        $logStmt->execute([$attendance_id]);
+        $timeline = $logStmt->fetchAll();
+
+        hrResponse(200, [
+            'record' => $record,
+            'timeline' => $timeline
+        ]);
+    } 
+    elseif ($action === 'attendance/stats') {
+        // GET /api/hr/attendance/stats
+        try {
+            $today = date('Y-m-d');
+            
+            // Total Active Employees
+            $empCount = $db->prepare("SELECT COUNT(*) FROM employees WHERE company_id = ? AND status = 'Active'");
+            $empCount->execute([$company_id]);
+            $totalEmployees = (int)$empCount->fetchColumn();
+
+            // Present Today
+            $attCount = $db->prepare("SELECT COUNT(*) FROM attendance a JOIN employees e ON a.employee_id = e.id WHERE e.company_id = ? AND a.date = ?");
+            $attCount->execute([$company_id, $today]);
+            $presentToday = (int)$attCount->fetchColumn();
+
+            // Late Today
+            $lateCount = $db->prepare("SELECT COUNT(*) FROM attendance a JOIN employees e ON a.employee_id = e.id WHERE e.company_id = ? AND a.date = ? AND a.status = 'Late'");
+            $lateCount->execute([$company_id, $today]);
+            $lateToday = (int)$lateCount->fetchColumn();
+
+            // Checked Out Today
+            $coCount = $db->prepare("SELECT COUNT(*) FROM attendance a JOIN employees e ON a.employee_id = e.id WHERE e.company_id = ? AND a.date = ? AND a.clock_out IS NOT NULL AND a.clock_out != ''");
+            $coCount->execute([$company_id, $today]);
+            $checkedOutToday = (int)$coCount->fetchColumn();
+
+            // WFH Today
+            $wfhCount = $db->prepare("SELECT COUNT(*) FROM attendance a JOIN employees e ON a.employee_id = e.id WHERE e.company_id = ? AND a.date = ? AND a.is_wfh = 1");
+            $wfhCount->execute([$company_id, $today]);
+            $wfhToday = (int)$wfhCount->fetchColumn();
+
+            // Average Working Hours Today
+            $hoursQuery = $db->prepare("SELECT clock_in, clock_out FROM attendance a JOIN employees e ON a.employee_id = e.id WHERE e.company_id = ? AND a.date = ? AND a.clock_out IS NOT NULL AND a.clock_out != ''");
+            $hoursQuery->execute([$company_id, $today]);
+            $records = $hoursQuery->fetchAll();
+            $totalMinutes = 0;
+            $count = 0;
+            foreach ($records as $r) {
+                if (!empty($r['clock_in']) && !empty($r['clock_out'])) {
+                    $in = strtotime($r['clock_in']);
+                    $out = strtotime($r['clock_out']);
+                    if ($out > $in) {
+                        $totalMinutes += ($out - $in) / 60;
+                        $count++;
+                    }
+                }
+            }
+            $avgHours = $count > 0 ? round($totalMinutes / $count / 60, 1) : 0.0;
+
+            // 7 Days Trends
+            $trends = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $date = date('Y-m-d', strtotime("-$i days"));
+                
+                $stmt = $db->prepare("SELECT COUNT(*) FROM attendance a JOIN employees e ON a.employee_id = e.id WHERE e.company_id = ? AND a.date = ?");
+                $stmt->execute([$company_id, $date]);
+                $present = (int)$stmt->fetchColumn();
+
+                $stmt = $db->prepare("SELECT COUNT(*) FROM attendance a JOIN employees e ON a.employee_id = e.id WHERE e.company_id = ? AND a.date = ? AND a.is_wfh = 1");
+                $stmt->execute([$company_id, $date]);
+                $wfh = (int)$stmt->fetchColumn();
+
+                $stmt = $db->prepare("SELECT COUNT(*) FROM attendance a JOIN employees e ON a.employee_id = e.id WHERE e.company_id = ? AND a.date = ? AND a.status = 'Late'");
+                $stmt->execute([$company_id, $date]);
+                $late = (int)$stmt->fetchColumn();
+
+                $trends[] = [
+                    'date' => date('d M', strtotime($date)),
+                    'present' => $present,
+                    'wfh' => $wfh,
+                    'late' => $late
+                ];
+            }
+
+            hrResponse(200, [
+                'metrics' => [
+                    'total_employees' => $totalEmployees,
+                    'present_today' => $presentToday,
+                    'absent_today' => max(0, $totalEmployees - $presentToday),
+                    'late_today' => $lateToday,
+                    'checked_in_today' => $presentToday,
+                    'checked_out_today' => $checkedOutToday,
+                    'wfh_today' => $wfhToday,
+                    'avg_working_hours' => $avgHours
+                ],
+                'trends' => $trends
+            ]);
+
+        } catch (Exception $e) {
+            hrResponse(500, ['error' => 'Failed to retrieve metrics', 'details' => $e->getMessage()]);
+        }
+    }
+    else {
+        // GET /api/hr/attendance (list)
+        $dateFilter = $_GET['date'] ?? null;
+        $queryStr = "SELECT a.*, u.name as employee_name, u.avatar, e.employee_code,
+                            d.name as department_name, ds.name as designation_name,
+                            b.name as branch_name
+                     FROM attendance a
+                     JOIN employees e ON a.employee_id = e.id
+                     JOIN users u ON e.user_id = u.id
+                     LEFT JOIN departments d ON e.department_id = d.id
+                     LEFT JOIN designations ds ON e.designation_id = ds.id
+                     LEFT JOIN branches b ON e.branch_id = b.id
+                     WHERE e.company_id = ?";
+        
+        $params = [$company_id];
+        if ($dateFilter) {
+            $queryStr .= " AND a.date = ?";
+            $params[] = $dateFilter;
+        }
+        $queryStr .= " ORDER BY a.date DESC, a.clock_in DESC LIMIT 150";
+        
+        $stmt = $db->prepare($queryStr);
+        $stmt->execute($params);
+        $attendanceRecords = $stmt->fetchAll();
+        
+        hrResponse(200, ['attendance' => $attendanceRecords]);
+    }
+}
+
+elseif ($action === 'live-attendance') {
+    // GET /api/hr/live-attendance
+    $today = date('Y-m-d');
+    $stmt = $db->prepare("SELECT a.*, u.name as employee_name, u.avatar, e.employee_code,
+                                 d.name as department_name, ds.name as designation_name,
+                                 b.name as branch_name
+                          FROM attendance a
+                          JOIN employees e ON a.employee_id = e.id
+                          JOIN users u ON e.user_id = u.id
+                          LEFT JOIN departments d ON e.department_id = d.id
+                          LEFT JOIN designations ds ON e.designation_id = ds.id
+                          LEFT JOIN branches b ON e.branch_id = b.id
+                          WHERE e.company_id = ? AND a.date = ?
+                          ORDER BY a.clock_in DESC");
+    $stmt->execute([$company_id, $today]);
+    $liveAttendance = $stmt->fetchAll();
+    
+    hrResponse(200, ['live_attendance' => $liveAttendance]);
+}
+
 else {
     hrResponse(404, ['error' => 'HR endpoint not found']);
 }

@@ -75,6 +75,13 @@ if (strpos($route, '/api/auth') === 0) {
         exit();
     }
     require_once __DIR__ . '/api/finance.php';
+} elseif (strpos($route, '/api/attendance') === 0) {
+    if (!$user) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized: Log in required']);
+        exit();
+    }
+    require_once __DIR__ . '/api/attendance.php';
 } elseif (strpos($route, '/api/employee') === 0) {
     if (!$user) {
         http_response_code(401);

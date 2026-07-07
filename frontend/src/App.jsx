@@ -41,55 +41,118 @@ export default function App() {
   return (
     <ErrorBoundary>
       <Router>
-        {!token ? (
-          <Routes>
-            <Route path="/login/superadmin" element={<Login onLoginSuccess={handleLoginSuccess} initialRole="superadmin" />} />
-            <Route path="/login/hr" element={<Login onLoginSuccess={handleLoginSuccess} initialRole="hr" />} />
-            <Route path="/login/finance" element={<Login onLoginSuccess={handleLoginSuccess} initialRole="finance" />} />
-            <Route path="/login/ca" element={<Login onLoginSuccess={handleLoginSuccess} initialRole="finance" />} />
-            <Route path="/login/employee" element={<Login onLoginSuccess={handleLoginSuccess} initialRole="employee" />} />
-            <Route path="/login" element={<PortalSelection />} />
-            <Route path="/register" element={<Login onLoginSuccess={handleLoginSuccess} initialRole="hr" initialTab="register" />} />
-            {/* Catch-all for unauthenticated users redirects to Portal Selection Hub */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        ) : (
-          <Layout user={user} onLogout={handleLogout}>
-            <Routes>
-              {/* Redirect root '/' to correct portal */}
-              <Route path="/" element={<Navigate to={getRoleDefaultPath(user.role)} replace />} />
+        <Routes>
+          {/* Employee Route */}
+          <Route 
+            path="/employee/*" 
+            element={
+              token ? (
+                user?.role === 'employee' ? (
+                  <Layout user={user} onLogout={handleLogout}>
+                    <EmployeeDashboard token={token} />
+                  </Layout>
+                ) : (
+                  <Navigate to={`/${user.role}`} replace />
+                )
+              ) : (
+                <Login onLoginSuccess={handleLoginSuccess} initialRole="employee" />
+              )
+            } 
+          />
 
-              {/* Portal routes */}
-              {user.role === 'superadmin' && (
-                <>
-                  <Route path="/superadmin/*" element={<SuperAdminDashboard token={token} />} />
-                  <Route path="*" element={<Navigate to="/superadmin" replace />} />
-                </>
-              )}
+          {/* HR Route */}
+          <Route 
+            path="/hr/*" 
+            element={
+              token ? (
+                user?.role === 'hr' ? (
+                  <Layout user={user} onLogout={handleLogout}>
+                    <HRDashboard token={token} />
+                  </Layout>
+                ) : (
+                  <Navigate to={`/${user.role}`} replace />
+                )
+              ) : (
+                <Login onLoginSuccess={handleLoginSuccess} initialRole="hr" />
+              )
+            } 
+          />
 
-              {user.role === 'hr' && (
-                <>
-                  <Route path="/hr/*" element={<HRDashboard token={token} />} />
-                  <Route path="*" element={<Navigate to="/hr" replace />} />
-                </>
-              )}
+          {/* CA / Finance Route */}
+          <Route 
+            path="/finance/*" 
+            element={
+              token ? (
+                user?.role === 'finance' ? (
+                  <Layout user={user} onLogout={handleLogout}>
+                    <FinanceDashboard token={token} />
+                  </Layout>
+                ) : (
+                  <Navigate to={`/${user.role}`} replace />
+                )
+              ) : (
+                <Login onLoginSuccess={handleLoginSuccess} initialRole="finance" />
+              )
+            } 
+          />
 
-              {user.role === 'finance' && (
-                <>
-                  <Route path="/finance/*" element={<FinanceDashboard token={token} />} />
-                  <Route path="*" element={<Navigate to="/finance" replace />} />
-                </>
-              )}
+          {/* Superadmin Route */}
+          <Route 
+            path="/superadmin/*" 
+            element={
+              token ? (
+                user?.role === 'superadmin' ? (
+                  <Layout user={user} onLogout={handleLogout}>
+                    <SuperAdminDashboard token={token} />
+                  </Layout>
+                ) : (
+                  <Navigate to={`/${user.role}`} replace />
+                )
+              ) : (
+                <Login onLoginSuccess={handleLoginSuccess} initialRole="superadmin" />
+              )
+            } 
+          />
 
-              {user.role === 'employee' && (
-                <>
-                  <Route path="/employee/*" element={<EmployeeDashboard token={token} />} />
-                  <Route path="*" element={<Navigate to="/employee" replace />} />
-                </>
-              )}
-            </Routes>
-          </Layout>
-        )}
+          {/* Legacy / Helper Login Redirects */}
+          <Route path="/login/superadmin" element={<Navigate to="/superadmin" replace />} />
+          <Route path="/login/hr" element={<Navigate to="/hr" replace />} />
+          <Route path="/login/finance" element={<Navigate to="/finance" replace />} />
+          <Route path="/login/ca" element={<Navigate to="/finance" replace />} />
+          <Route path="/login/employee" element={<Navigate to="/employee" replace />} />
+          <Route path="/login" element={<Navigate to="/employee" replace />} />
+
+          {/* Registration / Wizard Route */}
+          <Route 
+            path="/register" 
+            element={
+              <Login onLoginSuccess={handleLoginSuccess} initialRole="hr" initialTab="register" />
+            } 
+          />
+
+          {/* Fallbacks */}
+          <Route 
+            path="/" 
+            element={
+              token && user ? (
+                <Navigate to={`/${user.role}`} replace />
+              ) : (
+                <Navigate to="/employee" replace />
+              )
+            } 
+          />
+          
+          <Route 
+            path="*" 
+            element={
+              token && user ? (
+                <Navigate to={`/${user.role}`} replace />
+              ) : (
+                <Navigate to="/employee" replace />
+              )
+            } 
+          />
+        </Routes>
       </Router>
     </ErrorBoundary>
   );

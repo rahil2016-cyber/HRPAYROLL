@@ -79,6 +79,8 @@ export default function EmployeeDashboard({ token }) {
   const [leaves, setLeaves] = useState([]);
   const [payslips, setPayslips] = useState([]);
   const [profile, setProfile] = useState(null);
+  const [todayAttendance, setTodayAttendance] = useState(null);
+  const [attendanceHistory, setAttendanceHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Forms
@@ -111,6 +113,18 @@ export default function EmployeeDashboard({ token }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfile(profRes.data);
+
+      // Fetch upgraded attendance states
+      const attTodayRes = await axios.get('http://localhost:8000/index.php?route=/api/attendance/today', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTodayAttendance(attTodayRes.data.attendance);
+
+      const attHistRes = await axios.get('http://localhost:8000/index.php?route=/api/attendance/history', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAttendanceHistory(attHistRes.data.history || []);
+
     } catch (err) {
       console.error("Error loading employee dashboard data", err);
     } finally {
@@ -310,12 +324,12 @@ export default function EmployeeDashboard({ token }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
       {/* Tab Navigation header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #cbd5e1', paddingBottom: '1rem' }}>
+      <div className="resp-nav-header">
         <div>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>Employee Workspace</h2>
           <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Welcome back, {profile?.employee?.name}</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '8px' }}>
+        <div className="resp-tabs-container">
           {[
             { id: 'attendance', label: 'Attendance & Check-in' },
             { id: 'leaves', label: 'Leave Requests' },
@@ -358,63 +372,327 @@ export default function EmployeeDashboard({ token }) {
       )}
 
       {/* SUB-TAB 1: ATTENDANCE & CHECK-IN */}
-      {activeSubTab === 'attendance' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem' }}>
-          {/* Geofence Check In Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <GPSCheckIn 
-              branchName={profile?.employee?.branch_name}
-              officeLat={parseFloat(profile?.employee?.latitude || '12.9716')}
-              officeLng={parseFloat(profile?.employee?.longitude || '77.5946')}
-              radiusMeters={parseInt(profile?.employee?.radius_meters || '150')}
-              onClockIn={handleClockIn}
-              lastLog={today_attendance}
-            />
-          </div>
+      {activeSubTab === 'attendance' && (() => {
+        // Local helper for working hours calculation
+        const getWorkingHours = (record) => {
+          if (!record || !record.clock_in) return '--';
+          if (!record.clock_out) return 'In Progress';
+          try {
+            const partsIn = record.clock_in.split(':');
+            const partsOut = record.clock_out.split(':');
+            const minutes = (parseInt(partsOut[0]) * 60 + parseInt(partsOut[1])) - (parseInt(partsIn[0]) * 60 + parseInt(partsIn[1]));
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            return `${hours}h ${remainingMinutes}m`;
+          } catch (e) {
+            return '--';
+          }
+        };
 
-          {/* Announcements & Summary Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* Announcements Panel */}
-            <div className="premium-card">
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <MdCampaign size={18} color="#0047B8" /> Corporate Announcements
-              </h3>
-              {announcements.length === 0 ? (
-                <p style={{ color: '#64748b', fontSize: '0.8rem' }}>No announcements today.</p>
-              ) : (
+        // Monthly calendar render logic
+        const renderCalendarGrid = () => {
+          const today = new Date();
+          const year = today.getFullYear();
+          const month = today.getMonth();
+
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+          const attendanceMap = {};
+          attendanceHistory.forEach(att => {
+            if (att.date) {
+              const dateStr = att.date.split(' ')[0];
+              attendanceMap[dateStr] = att;
+            }
+          });
+
+          const leaveDaysMap = {};
+          leaves.forEach(l => {
+            if (l.status === 'Approved' && l.start_date && l.end_date) {
+              const start = new Date(l.start_date.split(' ')[0]);
+              const end = new Date(l.end_date.split(' ')[0]);
+              for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                leaveDaysMap[dateStr] = l.leave_name;
+              }
+            }
+          });
+
+          const calendarCells = [];
+          const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1; // Start from Monday
+          
+          for (let i = 0; i < adjustedFirstDay; i++) {
+            calendarCells.push(<div key={`empty-${i}`} style={{ opacity: 0.1 }} />);
+          }
+
+          for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dayOfWeek = date.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            const isPast = date < today && dateStr !== today.toISOString().split('T')[0];
+            const isToday = dateStr === today.toISOString().split('T')[0];
+
+            let cellStyle = {
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              aspectRatio: '1',
+              borderRadius: '8px',
+              fontSize: '0.8rem',
+              fontWeight: 'bold',
+              position: 'relative',
+              cursor: 'default',
+              transition: 'all 0.2s',
+            };
+
+            let bg = '#f8fafc';
+            let color = '#475569';
+            let border = '1px solid #e2e8f0';
+            let statusTooltip = '';
+
+            const attRecord = attendanceMap[dateStr];
+            const onLeave = leaveDaysMap[dateStr];
+
+            if (attRecord) {
+              if (attRecord.status === 'Late') {
+                bg = 'rgba(245, 158, 11, 0.12)';
+                color = '#d97706';
+                border = '1px solid rgba(245, 158, 11, 0.3)';
+                statusTooltip = `Late (${attRecord.clock_in})`;
+              } else {
+                bg = attRecord.is_wfh === 1 ? 'rgba(59, 130, 246, 0.12)' : 'rgba(16, 185, 129, 0.12)';
+                color = attRecord.is_wfh === 1 ? '#2563eb' : '#059669';
+                border = attRecord.is_wfh === 1 ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)';
+                statusTooltip = attRecord.is_wfh === 1 ? 'WFH' : 'Present';
+              }
+            } else if (onLeave) {
+              bg = 'rgba(139, 92, 246, 0.12)';
+              color = '#7c3aed';
+              border = '1px solid rgba(139, 92, 246, 0.3)';
+              statusTooltip = `Leave: ${onLeave}`;
+            } else if (isPast && !isWeekend) {
+              bg = 'rgba(239, 68, 68, 0.08)';
+              color = '#dc2626';
+              border = '1px solid rgba(239, 68, 68, 0.2)';
+              statusTooltip = 'Absent';
+            } else if (isWeekend) {
+              bg = '#f1f5f9';
+              color = '#94a3b8';
+              statusTooltip = 'Off';
+            } else if (isToday) {
+              border = '2px solid #0047B8';
+              statusTooltip = 'Today';
+            }
+
+            calendarCells.push(
+              <div 
+                key={`day-${day}`} 
+                style={{ ...cellStyle, backgroundColor: bg, color: color, border: border }}
+                title={statusTooltip}
+              >
+                {day}
+                {statusTooltip && (
+                  <span className="calendar-cell-status">{statusTooltip.split(' ')[0]}</span>
+                )}
+              </div>
+            );
+          }
+
+          return calendarCells;
+        };
+
+        return (
+          <div className="resp-grid-1-2">
+            {/* Geofence Clock In Column */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <GPSCheckIn 
+                token={token}
+                branchName={profile?.employee?.branch_name}
+                officeLat={parseFloat(profile?.employee?.latitude || '12.9716')}
+                officeLng={parseFloat(profile?.employee?.longitude || '77.5946')}
+                radiusMeters={parseInt(profile?.employee?.radius_meters || '150')}
+                onClockIn={fetchEmployeeData}
+                lastLog={todayAttendance}
+              />
+              
+              {/* leave balances snippet */}
+              <div className="premium-card" style={{ padding: '1.25rem' }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem' }}>My Leave Balances</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {announcements.map((a, idx) => (
-                    <div key={idx} style={{ padding: '0.75rem', backgroundColor: '#f8fafc', borderLeft: '3px solid #0047B8', borderRadius: '4px' }}>
-                      <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{a.title}</h4>
-                      <p style={{ fontSize: '0.75rem', color: '#475569', marginTop: '0.25rem' }}>{a.content}</p>
+                  {leave_balances.map((b, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', paddingBottom: '0.5rem', borderBottom: '1px solid #f1f5f9' }}>
+                      <span style={{ fontWeight: 600, color: '#475569' }}>{b.leave_name}</span>
+                      <strong style={{ color: '#0047B8' }}>{b.allocated - b.used} / {b.allocated} Left</strong>
                     </div>
                   ))}
                 </div>
-              )}
+              </div>
             </div>
 
-            {/* Leave balances */}
-            <div className="premium-card">
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '1rem' }}>Allocated Annual Leave Balances</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-                {leave_balances.map((b, idx) => (
-                  <StatCard 
-                    key={idx}
-                    title={b.leave_name}
-                    value={`${b.allocated - b.used} / ${b.allocated}`}
-                    desc={`Used: ${b.used} | Pending: ${b.pending}`}
-                    color="#0047B8"
-                  />
-                ))}
+            {/* Shift Tracker, Calendar and History Column */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {/* Premium Shift Status Card */}
+              <div className="premium-card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #0047B8 0%, #1e40af 100%)', color: '#fff' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Today's Shift Record</h3>
+                
+                <div className="resp-shift-grid">
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.7rem', opacity: 0.8 }}>SHIFT STATUS</span>
+                    <strong style={{ fontSize: '1rem' }}>
+                      {todayAttendance ? (todayAttendance.clock_out ? 'Shift Completed' : 'Shift Active') : 'Not Checked In'}
+                    </strong>
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.7rem', opacity: 0.8 }}>CHECK IN TIME</span>
+                    <strong style={{ fontSize: '1rem' }}>{todayAttendance?.clock_in || '--:--'}</strong>
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.7rem', opacity: 0.8 }}>CHECK OUT TIME</span>
+                    <strong style={{ fontSize: '1rem' }}>{todayAttendance?.clock_out || '--:--'}</strong>
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '0.7rem', opacity: 0.8 }}>WORKING HOURS</span>
+                    <strong style={{ fontSize: '1rem' }}>{getWorkingHours(todayAttendance)}</strong>
+                  </div>
+                </div>
+
+                {todayAttendance && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '1rem', marginTop: '1rem', fontSize: '0.75rem', opacity: 0.9 }}>
+                    <div>
+                      <span>GPS STATUS: </span>
+                      <strong style={{ color: todayAttendance.clock_in_gps_verified ? '#10b981' : '#f87171' }}>
+                        {todayAttendance.clock_in_gps_verified ? 'Verified (Office Geofence)' : 'WFH/Unverified'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>FACE BIOMETRICS: </span>
+                      <strong style={{ color: todayAttendance.clock_in_face_verified ? '#10b981' : '#f87171' }}>
+                        {todayAttendance.clock_in_face_verified ? `Verified (${todayAttendance.clock_in_face_score}%)` : 'Not Checked'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>LIVENESS STATUS: </span>
+                      <strong style={{ color: todayAttendance.clock_in_liveness_verified ? '#10b981' : '#f87171' }}>
+                        {todayAttendance.clock_in_liveness_verified ? `Verified (${todayAttendance.clock_in_liveness_score}%)` : 'Not Checked'}
+                      </strong>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Monthly Attendance Calendar */}
+              <div className="premium-card" style={{ padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>
+                  Monthly Attendance Calendar - {new Date().toLocaleDateString('default', { month: 'long', year: 'numeric' })}
+                </h3>
+                
+                {/* Weekdays headers */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem', textAlign: 'center', fontWeight: 700, fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <div key={d}>{d}</div>)}
+                </div>
+
+                {/* Calendar Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem' }}>
+                  {renderCalendarGrid()}
+                </div>
+
+                {/* Calendar Legend */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '1.25rem', borderTop: '1px solid #f1f5f9', paddingTop: '1rem', fontSize: '0.75rem', color: '#64748b' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)' }} />
+                    <span>Present</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.3)' }} />
+                    <span>Late Check-in</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.3)' }} />
+                    <span>WFH</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: 'rgba(139, 92, 246, 0.12)', border: '1px solid rgba(139, 92, 246, 0.3)' }} />
+                    <span>Approved Leave</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)' }} />
+                    <span>Absent</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1' }} />
+                    <span>Weekend Off</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Attendance history logs list */}
+              <div className="premium-card" style={{ padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>Recent Attendance History (Past 30 Days)</h3>
+                <div className="table-container">
+                  <table className="custom-table" style={{ fontSize: '0.8rem' }}>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Clock In</th>
+                        <th>Clock Out</th>
+                        <th>Working Hours</th>
+                        <th>Distance</th>
+                        <th>Verification</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {attendanceHistory.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" style={{ textAlign: 'center', color: '#64748b' }}>No recent attendance logs.</td>
+                        </tr>
+                      ) : (
+                        attendanceHistory.map((att, idx) => (
+                          <tr key={idx}>
+                            <td style={{ fontWeight: 600 }}>{att.date}</td>
+                            <td>{att.clock_in || '--:--'}</td>
+                            <td>{att.clock_out || '--:--'}</td>
+                            <td>{getWorkingHours(att)}</td>
+                            <td>
+                              {att.is_wfh === 1 ? 'WFH' : (
+                                att.clock_in_distance > 1000 ? `${(att.clock_in_distance/1000).toFixed(1)}km` : `${Math.round(att.clock_in_distance)}m`
+                              )}
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                <span title="GPS Status" style={{ padding: '0.1rem 0.25rem', borderRadius: '3px', fontSize: '0.65rem', backgroundColor: att.clock_in_gps_verified ? '#d1fae5' : '#fee2e2', color: att.clock_in_gps_verified ? '#065f46' : '#991b1b' }}>GPS</span>
+                                <span title="Face Verification" style={{ padding: '0.1rem 0.25rem', borderRadius: '3px', fontSize: '0.65rem', backgroundColor: att.clock_in_face_verified ? '#d1fae5' : '#fee2e2', color: att.clock_in_face_verified ? '#065f46' : '#991b1b' }}>Face</span>
+                              </div>
+                            </td>
+                            <td>
+                              <span style={{
+                                padding: '0.2rem 0.4rem',
+                                borderRadius: '4px',
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                backgroundColor: att.status === 'Present' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                                color: att.status === 'Present' ? '#059669' : '#d97706'
+                              }}>
+                                {att.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* SUB-TAB 2: LEAVE REQUESTS */}
       {activeSubTab === 'leaves' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem' }}>
+        <div className="resp-grid-1-2">
           {/* Submit Request Form */}
           <div className="premium-card" style={{ height: 'fit-content' }}>
             <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.25rem' }}>Apply for Leave</h3>
@@ -434,7 +712,7 @@ export default function EmployeeDashboard({ token }) {
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <div className="resp-date-grid">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   <label style={{ fontSize: '0.75rem', fontWeight: 600 }}>Start Date</label>
                   <input 
@@ -584,10 +862,10 @@ export default function EmployeeDashboard({ token }) {
 
           {/* Selected Payslip Detail Modal Sim - Formatted as Payslip PDF */}
           {selectedPayslip && (
-            <div className="premium-card" style={{ border: '2px solid #cbd5e1', borderTop: '6px solid #4c1d95', backgroundColor: '#ffffff', padding: '2rem', animation: 'fadeIn 0.3s' }}>
+            <div className="premium-card resp-payslip-modal">
               
               {/* Modal Control Header (Non-Printable in print out window, but structured nicely here) */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
+              <div className="resp-payslip-header">
                 <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Payslip Viewer</span>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                   <button 
@@ -615,7 +893,8 @@ export default function EmployeeDashboard({ token }) {
               </div>
 
               {/* Printable Area Container */}
-              <div id="payslip-to-print" style={{ color: '#0f172a', fontFamily: "'Inter', sans-serif" }}>
+              <div className="payslip-scroll-wrapper">
+                <div id="payslip-to-print" style={{ color: '#0f172a', fontFamily: "'Inter', sans-serif", minWidth: '700px' }}>
                 
                 {/* 1. Header Details */}
                 <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
@@ -799,7 +1078,8 @@ export default function EmployeeDashboard({ token }) {
                   </div>
                 </div>
 
-              </div>
+              </div> {/* payslip-to-print */}
+              </div> {/* payslip-scroll-wrapper */}
 
             </div>
           )}
@@ -833,7 +1113,7 @@ export default function EmployeeDashboard({ token }) {
 
       {/* SUB-TAB 5: PROFILE */}
       {activeSubTab === 'profile' && profile && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem' }}>
+        <div className="resp-grid-1-2">
           
           {/* File summary */}
           <div className="premium-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
@@ -870,7 +1150,7 @@ export default function EmployeeDashboard({ token }) {
             <div className="premium-card">
               <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.75rem' }}>Banking Account Allocation</h3>
               {profile.bank ? (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', fontSize: '0.8rem' }}>
+                <div className="resp-bank-grid">
                   <div>
                     <span style={{ color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>Bank Name</span>
                     <strong>{profile.bank.bank_name}</strong>

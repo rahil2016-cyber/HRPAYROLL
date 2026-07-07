@@ -2,12 +2,176 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Logo from '../components/Logo';
-import { MdBusiness, MdLock, MdMail, MdPeople, MdArrowForward, MdArrowBack, MdCheckCircle } from 'react-icons/md';
+import { 
+  MdBusiness, MdLock, MdMail, MdPeople, MdArrowForward, MdArrowBack, MdCheckCircle,
+  MdVisibility, MdVisibilityOff, MdPerson, MdPayments, MdAdminPanelSettings
+} from 'react-icons/md';
 
 export default function Login({ onLoginSuccess, initialRole, initialTab = 'login' }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab); // login or register
   const [roleMode, setRoleMode] = useState(initialRole || 'employee'); // superadmin, hr, finance, employee
+  const [showPassword, setShowPassword] = useState(false);
+
+  const renderDashboardMockup = () => {
+    switch (roleMode) {
+      case 'hr':
+        return (
+          <div className="mockup-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>HR Management Portal</span>
+              <span className="mockup-badge">
+                <span className="mockup-pulse-dot"></span> Active
+              </span>
+            </div>
+            
+            <div className="mockup-grid">
+              <div className="mockup-card">
+                <span className="mockup-card-title">Total Staff</span>
+                <span className="mockup-card-value">128</span>
+                <span style={{ fontSize: '0.55rem', color: '#10b981' }}>+8 onboarded this month</span>
+              </div>
+              <div className="mockup-card">
+                <span className="mockup-card-title">Present Today</span>
+                <span className="mockup-card-value">114 / 120</span>
+                <div className="mockup-progress-bar">
+                  <div className="mockup-progress-fill" style={{ width: '95%' }}></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mockup-card" style={{ flex: 1 }}>
+              <span className="mockup-card-title">Geofence Parameters</span>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.2rem', alignItems: 'center' }}>
+                <div className="mockup-geofence-visualizer" style={{ flex: 1 }}>
+                  <div className="mockup-geofence-circle"></div>
+                  <div className="mockup-geofence-pin"></div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', fontSize: '0.6rem' }}>
+                  <span style={{ fontWeight: 600, color: '#fff' }}>Main Office HQ</span>
+                  <span>Lat: 12.9716° N</span>
+                  <span>Lon: 77.5946° E</span>
+                  <span style={{ color: '#10b981', fontWeight: 600 }}>Radius: 150m (Strict)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'finance':
+        return (
+          <div className="mockup-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>Finance & Payroll Portal</span>
+              <span className="mockup-badge neutral">Audit Mode</span>
+            </div>
+            
+            <div className="mockup-grid">
+              <div className="mockup-card">
+                <span className="mockup-card-title">Total Payroll Cost</span>
+                <span className="mockup-card-value">$48,250</span>
+                <span style={{ fontSize: '0.55rem', color: '#94a3b8' }}>July 2026 Cycle</span>
+              </div>
+              <div className="mockup-card">
+                <span className="mockup-card-title">Tax Thresholds</span>
+                <span className="mockup-card-value">Compliance OK</span>
+                <div style={{ display: 'flex', gap: '4px', marginTop: '0.15rem' }}>
+                  <span style={{ fontSize: '0.5rem', background: 'rgba(255,255,255,0.06)', padding: '1px 3px', borderRadius: '2px' }}>TDS: 5%</span>
+                  <span style={{ fontSize: '0.5rem', background: 'rgba(255,255,255,0.06)', padding: '1px 3px', borderRadius: '2px' }}>PF: 12%</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mockup-card" style={{ flex: 1 }}>
+              <span className="mockup-card-title">Expense Claims for Audit</span>
+              <div className="mockup-list" style={{ marginTop: '0.2rem' }}>
+                <div className="mockup-list-item">
+                  <span className="mockup-list-item-title">Client dinner meeting bills</span>
+                  <span className="mockup-list-item-status" style={{ color: '#f59e0b' }}>Pending Audit</span>
+                </div>
+                <div className="mockup-list-item">
+                  <span className="mockup-list-item-title">AWS Server Cloud Invoice</span>
+                  <span className="mockup-list-item-status" style={{ color: '#10b981' }}>Approved</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'superadmin':
+        return (
+          <div className="mockup-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>Super Admin Console</span>
+              <span className="mockup-badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>System Diagnostic</span>
+            </div>
+            
+            <div className="mockup-grid">
+              <div className="mockup-card">
+                <span className="mockup-card-title">Tenant Companies</span>
+                <span className="mockup-card-value">18 Active</span>
+                <span style={{ fontSize: '0.55rem', color: '#10b981' }}>All SQLite DB pools OK</span>
+              </div>
+              <div className="mockup-card">
+                <span className="mockup-card-title">Resource Utilization</span>
+                <span className="mockup-card-value">12.4% CPU</span>
+                <div className="mockup-progress-bar">
+                  <div className="mockup-progress-fill" style={{ width: '12%', backgroundColor: '#ef4444' }}></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mockup-card" style={{ flex: 1 }}>
+              <span className="mockup-card-title">System Diagnostic Log Stream</span>
+              <div className="mockup-terminal" style={{ marginTop: '0.2rem' }}>
+                <div>[SYSTEM] 2026-07-07 16:10:56 - Connection established</div>
+                <div>[DATABASE] Migration check: 14 schemas verified [OK]</div>
+                <div>[API] Auth Token validation active - JWT module ready</div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'employee':
+      default:
+        return (
+          <div className="mockup-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fff' }}>Employee Workspace</span>
+              <span className="mockup-badge">
+                <span className="mockup-pulse-dot"></span> In Office Geofence
+              </span>
+            </div>
+            
+            <div className="mockup-grid">
+              <div className="mockup-card">
+                <span className="mockup-card-title">Shift Tracker</span>
+                <span className="mockup-card-value">08:42:15</span>
+                <span style={{ fontSize: '0.55rem', color: '#10b981' }}>Shift Active - Checked In</span>
+              </div>
+              <div className="mockup-card">
+                <span className="mockup-card-title">Geofence Distance</span>
+                <span className="mockup-card-value">12 Meters Away</span>
+                <div className="mockup-progress-bar">
+                  <div className="mockup-progress-fill" style={{ width: '85%' }}></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mockup-card" style={{ flex: 1 }}>
+              <span className="mockup-card-title">My Recent Payslips</span>
+              <div className="mockup-list" style={{ marginTop: '0.2rem' }}>
+                <div className="mockup-list-item">
+                  <span className="mockup-list-item-title">Payslip_2026_APR.pdf</span>
+                  <span className="mockup-list-item-status" style={{ color: '#10b981' }}>$3,420 (Net)</span>
+                </div>
+                <div className="mockup-list-item">
+                  <span className="mockup-list-item-title">Payslip_2026_MAR.pdf</span>
+                  <span className="mockup-list-item-status" style={{ color: '#10b981' }}>$3,420 (Net)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
 
   // Auto-fill logins based on selected portal
   const getInitialCredentials = (role) => {
@@ -58,25 +222,37 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
       name: 'Employee Portal',
       accent: '#0047B8',
       desc: 'Access your work dashboard, check-in, and view payslips.',
-      rgb: '0, 71, 184'
+      rgb: '0, 71, 184',
+      gradient: 'linear-gradient(135deg, #0047B8 0%, #1e40af 100%)',
+      heroTitle: 'Empower Your Workday',
+      heroDesc: 'Clock-in using GPS geofencing, track your working hours in real-time, view verified payslips, and manage your leaves effortlessly.'
     },
     hr: {
       name: 'HR Management Portal',
       accent: '#E30613',
       desc: 'Manage payroll, branch setup, company rules, and directory.',
-      rgb: '227, 6, 19'
+      rgb: '227, 6, 19',
+      gradient: 'linear-gradient(135deg, #E30613 0%, #be123c 100%)',
+      heroTitle: 'Streamline HR Operations',
+      heroDesc: 'Onboard employees, configure custom branch geofencing parameters, approve leave requests, and manage corporate hierarchies from a single panel.'
     },
     finance: {
       name: 'Finance & CA Operations',
       accent: '#0d9488',
       desc: 'Configure tax limits, process monthly cycles, and audit expenses.',
-      rgb: '13, 148, 136'
+      rgb: '13, 148, 136',
+      gradient: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+      heroTitle: 'Automated Payroll & Compliance',
+      heroDesc: 'Generate monthly payslip cycles, audit corporate expense reimbursement claims, and configure automated TDS, PF, and ESI tax thresholds.'
     },
     superadmin: {
       name: 'Super Admin Console',
       accent: '#475569',
       desc: 'System diagnostics and global corporation registrations.',
-      rgb: '71, 85, 105'
+      rgb: '71, 85, 105',
+      gradient: 'linear-gradient(135deg, #475569 0%, #334155 100%)',
+      heroTitle: 'Global Platform Control',
+      heroDesc: 'Register new client companies, monitor tenant active plans, configure system parameters, and diagnose database performance.'
     }
   };
   
@@ -128,29 +304,14 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#f8fafc',
-      padding: '2rem'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: activeTab === 'login' ? '500px' : '750px',
-        backgroundColor: '#ffffff',
-        borderRadius: '16px',
-        boxShadow: `0 20px 25px -5px rgba(${theme.rgb}, 0.08), 0 10px 10px -5px rgba(${theme.rgb}, 0.04)`,
-        border: '1px solid #e2e8f0',
-        padding: '2.5rem',
-        transition: 'max-width 0.3s'
-      }}>
+    <div className="login-split-container" style={{ '--theme-accent': theme.accent, '--theme-accent-rgb': theme.rgb }}>
+      <div className="login-left-panel">
+        <div className={`login-form-wrapper ${activeTab === 'register' ? 'login-form-wrapper-wide' : ''}`}>
         
         {/* Brand Logo Header */}
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <Logo width={180} height={45} />
-          <p style={{ color: '#64748b', fontSize: '0.875rem', marginTop: '0.5rem', fontWeight: 500 }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+          <Logo width={185} height={46} />
+          <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '0.4rem', fontWeight: 500 }}>
             Enterprise HR & Payroll Automation
           </p>
         </div>
@@ -166,10 +327,10 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
             borderRadius: '10px',
             animation: 'fadeIn 0.3s ease-out'
           }}>
-            <h3 style={{ color: theme.accent, fontWeight: 700, fontSize: '1.1rem', margin: 0 }}>
+            <h3 style={{ color: theme.accent, fontWeight: 700, fontSize: '1.05rem', margin: 0 }}>
               {theme.name}
             </h3>
-            <p style={{ color: '#64748b', fontSize: '0.75rem', marginTop: '0.25rem', margin: 0, lineHeight: '1.4' }}>
+            <p style={{ color: '#64748b', fontSize: '0.725rem', marginTop: '0.25rem', margin: 0, lineHeight: '1.4' }}>
               {theme.desc}
             </p>
           </div>
@@ -182,7 +343,7 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
             backgroundColor: '#f1f5f9',
             borderRadius: '8px',
             padding: '0.25rem',
-            marginBottom: '2rem'
+            marginBottom: '1.75rem'
           }}>
             <button
               onClick={() => { setActiveTab('login'); setError(null); }}
@@ -241,34 +402,24 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
             {/* Quick Demo Role Cards / Demo credentials info */}
             {!initialRole ? (
               <div>
-                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.4rem' }}>
                   Select Portal Mode (Pre-fills Credentials):
                 </span>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
+                <div className="role-grid-container">
                   {[
-                    { label: 'Employee', role: 'employee' },
-                    { label: 'HR Admin', role: 'hr' },
-                    { label: 'Finance/CA', role: 'finance' },
-                    { label: 'Super Admin', role: 'superadmin' }
+                    { label: 'Employee', role: 'employee', icon: MdPeople },
+                    { label: 'HR Admin', role: 'hr', icon: MdBusiness },
+                    { label: 'Finance/CA', role: 'finance', icon: MdPayments },
+                    { label: 'Super Admin', role: 'superadmin', icon: MdAdminPanelSettings }
                   ].map((item) => (
                     <button
                       key={item.role}
                       type="button"
                       onClick={() => selectPortalRole(item.role)}
-                      style={{
-                        padding: '0.5rem',
-                        border: '1px solid',
-                        borderColor: roleMode === item.role ? theme.accent : '#cbd5e1',
-                        borderRadius: '6px',
-                        backgroundColor: roleMode === item.role ? `${theme.accent}0d` : '#fff',
-                        color: roleMode === item.role ? theme.accent : '#475569',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                      }}
+                      className={`role-card-btn ${roleMode === item.role ? 'active' : ''}`}
                     >
-                      {item.label}
+                      <item.icon className="role-card-icon" />
+                      <span className="role-card-label">{item.label}</span>
                     </button>
                   ))}
                 </div>
@@ -292,96 +443,87 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
             )}
 
             {/* Email Field */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}>Email Address</label>
-              <div style={{ position: 'relative' }}>
-                <MdMail style={{ position: 'absolute', left: '12px', top: '12px', color: '#94a3b8' }} size={20} />
+            <div className="login-input-group">
+              <label className="login-input-label">Email Address</label>
+              <div className="login-input-wrapper">
+                <div className="login-input-icon">
+                  <MdMail size={18} />
+                </div>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="name@company.com"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 0.75rem 0.75rem 2.5rem',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem'
-                  }}
+                  className="login-input-field"
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <div className="login-input-group">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}>Password</label>
+                <label className="login-input-label">Password</label>
                 <a href="#" style={{ fontSize: '0.75rem', color: theme.accent, textDecoration: 'none', fontWeight: 600 }}>Forgot?</a>
               </div>
-              <div style={{ position: 'relative' }}>
-                <MdLock style={{ position: 'absolute', left: '12px', top: '12px', color: '#94a3b8' }} size={20} />
+              <div className="login-input-wrapper">
+                <div className="login-input-icon">
+                  <MdLock size={18} />
+                </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 0.75rem 0.75rem 2.5rem',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem'
-                  }}
+                  className="login-input-field"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  className="login-password-toggle"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <MdVisibilityOff size={18} /> : <MdVisibility size={18} />}
+                </button>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              style={{
-                marginTop: '0.5rem',
-                backgroundColor: theme.accent,
-                color: '#fff',
-                border: 'none',
-                padding: '0.85rem',
-                borderRadius: '6px',
-                fontWeight: 600,
-                fontSize: '0.95rem',
-                cursor: 'pointer',
-                transition: 'opacity 0.2s',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
+              className="login-submit-btn"
             >
               {loading ? 'Logging in...' : `Enter ${roleMode.toUpperCase()} Portal`}
             </button>
 
             {/* Switch Portal Action Link */}
             {initialRole && (
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => navigate('/login')}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#64748b',
-                    fontSize: '0.85rem',
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = theme.accent}
-                  onMouseLeave={(e) => e.target.style.color = '#64748b'}
-                >
-                  ← Go back to Portal Selection
-                </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', marginTop: '0.75rem' }}>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Switch to Another Workspace Gateway:</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem' }}>
+                  {['employee', 'hr', 'finance', 'superadmin'].filter(r => r !== initialRole).map(r => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => navigate(`/${r}`)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: theme.accent,
+                        fontSize: '0.8rem',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        transition: 'opacity 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.opacity = '0.8'}
+                      onMouseLeave={(e) => e.target.style.opacity = '1'}
+                    >
+                      {r === 'hr' ? 'HR' : r === 'finance' ? 'Finance' : r === 'superadmin' ? 'Super Admin' : 'Employee'}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -421,43 +563,30 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
             ) : (
               <div>
                 {/* Wizard steps indicator bar */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '2rem',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  color: '#94a3b8',
-                  borderBottom: '1px solid #e2e8f0',
-                  paddingBottom: '0.75rem'
-                }}>
+                <div className="wizard-progress-bar-container">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((step) => (
                     <span 
                       key={step} 
-                      style={{ 
-                        color: wizardStep === step ? theme.accent : (wizardStep > step ? '#0047B8' : '#94a3b8'),
-                        borderBottom: wizardStep === step ? `2px solid ${theme.accent}` : 'none',
-                        paddingBottom: '0.25rem'
-                      }}
+                      className={`wizard-progress-step ${wizardStep === step ? 'active' : ''} ${wizardStep > step ? 'completed' : ''}`}
                     >
                       Step {step}
                     </span>
                   ))}
                 </div>
 
-                <div style={{ minHeight: '180px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="wizard-step-card" style={{ minHeight: '180px', display: 'flex', flexDirection: 'column' }}>
                   
                   {/* Step 1: Company details */}
                   {wizardStep === 1 && (
                     <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>Step 1: Company Profile</h4>
+                      <h4 className="wizard-step-title">Step 1: Company Profile</h4>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                         <div>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Company Name</label>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Company Name</label>
                           <input type="text" name="companyName" value={wizardData.companyName} onChange={handleWizardChange} placeholder="e.g. Acme Corp" style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Short Code</label>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Short Code</label>
                           <input type="text" name="companyCode" value={wizardData.companyCode} onChange={handleWizardChange} placeholder="e.g. ACME" style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                         </div>
                       </div>
@@ -467,23 +596,23 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
                   {/* Step 2: Branch Creation */}
                   {wizardStep === 2 && (
                     <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>Step 2: Geofenced Branch Creation</h4>
+                      <h4 className="wizard-step-title">Step 2: Geofenced Branch Creation</h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         <div>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Branch Name</label>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Branch Name</label>
                           <input type="text" name="branchName" value={wizardData.branchName} onChange={handleWizardChange} placeholder="Headquarters" style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
                           <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Office Latitude</label>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Office Latitude</label>
                             <input type="text" name="latitude" value={wizardData.latitude} onChange={handleWizardChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                           </div>
                           <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Office Longitude</label>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Office Longitude</label>
                             <input type="text" name="longitude" value={wizardData.longitude} onChange={handleWizardChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                           </div>
                           <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Radius (Meters)</label>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Radius (Meters)</label>
                             <input type="text" name="radiusMeters" value={wizardData.radiusMeters} onChange={handleWizardChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                           </div>
                         </div>
@@ -494,9 +623,9 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
                   {/* Step 3: Departments */}
                   {wizardStep === 3 && (
                     <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>Step 3: Initial Department</h4>
+                      <h4 className="wizard-step-title">Step 3: Initial Department</h4>
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Department Name</label>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Department Name</label>
                         <input type="text" name="departmentName" value={wizardData.departmentName} onChange={handleWizardChange} placeholder="e.g. Engineering, Sales, HR" style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                       </div>
                     </div>
@@ -505,9 +634,9 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
                   {/* Step 4: Designations */}
                   {wizardStep === 4 && (
                     <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>Step 4: Designation Parameters</h4>
+                      <h4 className="wizard-step-title">Step 4: Designation Parameters</h4>
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Designation Name</label>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Designation Name</label>
                         <input type="text" name="designationName" value={wizardData.designationName} onChange={handleWizardChange} placeholder="e.g. Senior Developer" style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                       </div>
                     </div>
@@ -516,14 +645,14 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
                   {/* Step 5: Salary Components */}
                   {wizardStep === 5 && (
                     <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>Step 5: Salary Components Allocation</h4>
+                      <h4 className="wizard-step-title">Step 5: Salary Components Allocation</h4>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                         <div>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Basic (% of Gross)</label>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Basic (% of Gross)</label>
                           <input type="number" name="salaryBasic" value={wizardData.salaryBasic} onChange={handleWizardChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>HRA (% of Gross)</label>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>HRA (% of Gross)</label>
                           <input type="number" name="salaryHra" value={wizardData.salaryHra} onChange={handleWizardChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                         </div>
                       </div>
@@ -533,10 +662,10 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
                   {/* Step 6: Attendance Rules */}
                   {wizardStep === 6 && (
                     <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>Step 6: Attendance Rules</h4>
+                      <h4 className="wizard-step-title">Step 6: Attendance Rules</h4>
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Enable GPS Geofencing Check-in?</label>
-                        <select name="geofenceEnabled" value={wizardData.geofenceEnabled} onChange={handleWizardChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Enable GPS Geofencing Check-in?</label>
+                        <select name="geofenceEnabled" value={wizardData.geofenceEnabled} onChange={handleWizardChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1', color: '#1e293b' }}>
                           <option value="true">Yes, strict geofence radius check</option>
                           <option value="false">No, allow clock-in anywhere</option>
                         </select>
@@ -547,9 +676,9 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
                   {/* Step 7: Leave Policies */}
                   {wizardStep === 7 && (
                     <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>Step 7: Leave Policies</h4>
+                      <h4 className="wizard-step-title">Step 7: Leave Policies</h4>
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Total Casual/Sick Leaves Allocated (Annual)</label>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Total Casual/Sick Leaves Allocated (Annual)</label>
                         <input type="number" name="leaveTotalDays" value={wizardData.leaveTotalDays} onChange={handleWizardChange} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                       </div>
                     </div>
@@ -558,19 +687,19 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
                   {/* Step 8: Invite Employees / Admin User creation */}
                   {wizardStep === 8 && (
                     <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>Step 8: HR / Company Owner Credentials</h4>
+                      <h4 className="wizard-step-title">Step 8: HR / Company Owner Credentials</h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         <div>
-                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Full Name</label>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Full Name</label>
                           <input type="text" name="hrName" value={wizardData.hrName} onChange={handleWizardChange} placeholder="John Doe" style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                           <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Login Email</label>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Login Email</label>
                             <input type="email" name="hrEmail" value={wizardData.hrEmail} onChange={handleWizardChange} placeholder="owner@company.com" style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                           </div>
                           <div>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Login Password</label>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>Login Password</label>
                             <input type="password" name="hrPassword" value={wizardData.hrPassword} onChange={handleWizardChange} placeholder="••••••••" style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
                           </div>
                         </div>
@@ -581,7 +710,7 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
                   {/* Step 9: Review & Submit */}
                   {wizardStep === 9 && (
                     <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', color: '#0f172a' }}>Step 9: Review Settings & Submit</h4>
+                      <h4 className="wizard-step-title">Step 9: Review Settings & Submit</h4>
                       <div style={{ padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '6px', fontSize: '0.8rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <div><strong>Company:</strong> {wizardData.companyName} ({wizardData.companyCode})</div>
                         <div><strong>Geofence Branch:</strong> {wizardData.branchName} ({wizardData.radiusMeters}m radius)</div>
@@ -663,7 +792,36 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
           </div>
         )}
 
-      </div>
+        </div> {/* login-form-wrapper */}
+      </div> {/* login-left-panel */}
+
+      {activeTab === 'login' && (
+        <div className="login-right-panel" style={{ background: theme.gradient }}>
+          {/* Dynamic Mockup Window */}
+          <div className="mockup-window">
+            <div className="mockup-header">
+              <div className="mockup-dots">
+                <div className="mockup-dot"></div>
+                <div className="mockup-dot"></div>
+                <div className="mockup-dot"></div>
+              </div>
+              <div className="mockup-title-bar">localhost:5173/{roleMode}</div>
+            </div>
+            <div className="mockup-body">
+              <div className="mockup-sidebar">
+                <div className="mockup-sidebar-item active"></div>
+                <div className="mockup-sidebar-item"></div>
+                <div className="mockup-sidebar-item"></div>
+                <div className="mockup-sidebar-item"></div>
+              </div>
+              {renderDashboardMockup()}
+            </div>
+          </div>
+
+          <h2 className="login-hero-title" style={{ marginTop: '2.5rem' }}>{theme.heroTitle}</h2>
+          <p className="login-hero-desc">{theme.heroDesc}</p>
+        </div>
+      )}
     </div>
   );
 }

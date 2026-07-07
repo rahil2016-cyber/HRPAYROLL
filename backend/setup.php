@@ -166,28 +166,66 @@ try {
     $queries[] = "CREATE TABLE IF NOT EXISTS attendance (
         id $pk,
         employee_id INT NOT NULL,
+        company_id INT NOT NULL,
+        branch_id INT,
         date $dateTimeType NOT NULL,
         clock_in VARCHAR(10),
         clock_out VARCHAR(10),
+        clock_in_photo VARCHAR(255),
+        clock_out_photo VARCHAR(255),
         clock_in_lat $decimal,
         clock_in_lng $decimal,
         clock_out_lat $decimal,
         clock_out_lng $decimal,
+        clock_in_distance $decimal,
+        clock_out_distance $decimal,
+        clock_in_gps_accuracy $decimal,
+        clock_out_gps_accuracy $decimal,
+        clock_in_browser VARCHAR(100),
+        clock_in_os VARCHAR(100),
+        clock_in_device VARCHAR(150),
+        clock_in_ip VARCHAR(45),
+        clock_in_network VARCHAR(50),
+        clock_in_battery $decimal,
+        clock_in_face_score $decimal,
+        clock_in_face_verified INT DEFAULT 0,
+        clock_in_liveness_score $decimal,
+        clock_in_liveness_verified INT DEFAULT 0,
+        clock_in_gps_verified INT DEFAULT 0,
+        clock_out_browser VARCHAR(100),
+        clock_out_os VARCHAR(100),
+        clock_out_device VARCHAR(150),
+        clock_out_ip VARCHAR(45),
+        clock_out_network VARCHAR(50),
+        clock_out_battery $decimal,
+        clock_out_face_score $decimal,
+        clock_out_face_verified INT DEFAULT 0,
+        clock_out_liveness_score $decimal,
+        clock_out_liveness_verified INT DEFAULT 0,
+        clock_out_gps_verified INT DEFAULT 0,
         status VARCHAR(20) DEFAULT 'Present', -- Present, Absent, Late, Half-day
         is_wfh INT DEFAULT 0,
         overtime_minutes INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT $dateTimeNow
+        created_at TIMESTAMP DEFAULT $dateTimeNow,
+        updated_at TIMESTAMP DEFAULT $dateTimeNow
     )";
 
     // 17. Attendance Logs
     $queries[] = "CREATE TABLE IF NOT EXISTS attendance_logs (
         id $pk,
+        attendance_id INT,
         employee_id INT NOT NULL,
-        log_type VARCHAR(20) NOT NULL, -- IN, OUT
+        action VARCHAR(20) NOT NULL, -- Check In, Check Out
         timestamp TIMESTAMP DEFAULT $dateTimeNow,
         latitude $decimal,
         longitude $decimal,
-        device_info VARCHAR(255)
+        distance $decimal,
+        browser VARCHAR(100),
+        device VARCHAR(150),
+        ip_address VARCHAR(45),
+        photo VARCHAR(255),
+        status VARCHAR(20),
+        remarks $text
     )";
 
     // 18. Attendance Regularization
