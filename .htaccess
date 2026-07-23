@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1. Allow direct access to the backend folder
+  RewriteCond %{REQUEST_URI} ^/backend/
+  RewriteRule ^(.*)$ - [L]
+
+  # 2. Serve static files from frontend/dist if they exist
+  RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} -f
+  RewriteRule ^(.*)$ frontend/dist/$1 [L]
+
+  # 3. Rewrite all other frontend requests to the React Router index.html
+  RewriteCond %{REQUEST_URI} !^/backend/
+  RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} !-f
+  RewriteRule ^(.*)$ frontend/dist/index.html [L]
+</IfModule>
