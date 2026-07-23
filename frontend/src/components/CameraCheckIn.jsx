@@ -199,7 +199,7 @@ export default function CameraCheckIn({
         battery_level: meta.batteryLevel
       };
 
-      const url = `http://localhost:8000/index.php?route=/api/attendance/${actionType}`;
+      const url = `${window.API_BASE_URL}/index.php?route=/api/attendance/${actionType}`;
       const response = await axios.post(url, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -215,7 +215,9 @@ export default function CameraCheckIn({
       }
     } catch (err) {
       setMessageType('error');
-      setMessage(err.response?.data?.error || "Attendance registration failed.");
+      const errMsg = err.response?.data?.error || "Attendance registration failed.";
+      const details = err.response?.data?.details ? `: ${err.response.data.details}` : "";
+      setMessage(errMsg + details);
     } finally {
       setLoading(false);
     }

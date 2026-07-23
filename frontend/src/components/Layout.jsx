@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 import { 
   MdDashboard, MdPeople, MdLayers, MdAttachMoney, MdReceipt, 
@@ -10,6 +10,7 @@ import {
 export default function Layout({ user, children, onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleNav = (path) => {
     navigate(path);
@@ -23,6 +24,7 @@ export default function Layout({ user, children, onLogout }) {
         return [
           { label: 'Dashboard', path: '/superadmin', icon: MdDashboard },
           { label: 'Companies', path: '/superadmin/companies', icon: MdBusiness },
+          { label: 'CA Management', path: '/superadmin/cas', icon: MdPeople },
           { label: 'Subscription Plans', path: '/superadmin/plans', icon: MdCreditCard },
           { label: 'Support Tickets', path: '/superadmin/tickets', icon: MdBugReport }
         ];
@@ -32,7 +34,8 @@ export default function Layout({ user, children, onLogout }) {
           { label: 'Employee Registry', path: '/hr/employees', icon: MdPeople },
           { label: 'Leave Applications', path: '/hr/leaves', icon: MdDateRange },
           { label: 'Departments', path: '/hr/departments', icon: MdLayers },
-          { label: 'Designations', path: '/hr/designations', icon: MdWork }
+          { label: 'Designations', path: '/hr/designations', icon: MdWork },
+          { label: 'Settings', path: '/hr/settings', icon: MdSettings }
         ];
       case 'finance':
         return [
@@ -133,6 +136,10 @@ export default function Layout({ user, children, onLogout }) {
         <nav style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
           {menuItems.map((item, idx) => {
             const Icon = item.icon;
+            const isActive = location.pathname === item.path || 
+              (item.path !== '/' && location.pathname.startsWith(item.path + '/')) || 
+              (item.path === '/superadmin' && (location.pathname === '/superadmin' || location.pathname === '/superadmin/'));
+            
             return (
               <button
                 key={idx}
@@ -143,26 +150,30 @@ export default function Layout({ user, children, onLogout }) {
                   gap: '0.75rem',
                   width: '100%',
                   padding: '0.85rem 1rem',
-                  backgroundColor: 'transparent',
+                  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
                   border: 'none',
                   borderRadius: '8px',
-                  color: '#94a3b8',
+                  color: isActive ? '#fff' : '#94a3b8',
                   fontSize: '0.9rem',
-                  fontWeight: 500,
+                  fontWeight: isActive ? 700 : 500,
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.2s'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)';
-                  e.currentTarget.style.color = '#fff';
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)';
+                    e.currentTarget.style.color = '#fff';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#94a3b8';
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#94a3b8';
+                  }
                 }}
               >
-                <Icon size={20} style={{ color: '#E30613' }} />
+                <Icon size={20} style={{ color: isActive ? '#fff' : '#E30613' }} />
                 <span>{item.label}</span>
               </button>
             );

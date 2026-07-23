@@ -1,0 +1,2 @@
+This is a dummy test document for verifying the Employee Vault upload functionality.
+Document ID: TEST-999-123.

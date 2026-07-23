@@ -89,6 +89,13 @@ if (strpos($route, '/api/auth') === 0) {
         exit();
     }
     require_once __DIR__ . '/api/employee.php';
+} elseif (strpos($route, '/api/documents') === 0) {
+    if (!$user) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized: Log in required']);
+        exit();
+    }
+    require_once __DIR__ . '/api/documents.php';
 } else {
     http_response_code(404);
     echo json_encode(['error' => 'Endpoint not found', 'requested_route' => $route]);

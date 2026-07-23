@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import GPSCheckIn from '../components/GPSCheckIn';
 import StatCard from '../components/StatCard';
@@ -38,6 +39,14 @@ const generateUAN = (employeeCode) => {
   return `101229722${cleanCode.padEnd(3, '0')}`;
 };
 
+const getCleanFileName = (path) => {
+  if (!path) return '';
+  const parts = path.split('/');
+  const base = parts[parts.length - 1];
+  const match = base.match(/^doc_\d+_\d+_[a-f0-9]+_(.+)$/);
+  return match ? match[1] : base;
+};
+
 function numberToWords(num) {
   if (num === 0) return 'Zero Rupees';
   const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -74,7 +83,17 @@ function numberToWords(num) {
 }
 
 export default function EmployeeDashboard({ token }) {
-  const [activeSubTab, setActiveSubTab] = useState('attendance'); // attendance, leaves, payslips, vault, profile
+  const location = useLocation();
+
+  const getActiveTabFromPath = (pathname) => {
+    if (pathname.includes('/employee/leaves')) return 'leaves';
+    if (pathname.includes('/employee/payslips')) return 'payslips';
+    if (pathname.includes('/employee/vault')) return 'vault';
+    if (pathname.includes('/employee/profile')) return 'profile';
+    return 'attendance';
+  };
+
+  const activeSubTab = getActiveTabFromPath(location.pathname);
   const [dashboardData, setDashboardData] = useState(null);
   const [leaves, setLeaves] = useState([]);
   const [payslips, setPayslips] = useState([]);
@@ -82,6 +101,13 @@ export default function EmployeeDashboard({ token }) {
   const [todayAttendance, setTodayAttendance] = useState(null);
   const [attendanceHistory, setAttendanceHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Documents state
+  const [documents, setDocuments] = useState([]);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadForm, setUploadForm] = useState({ doc_type: 'PAN Card', doc_number: '', file_name: '', file_data: '' });
+  const [uploadError, setUploadError] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   // Forms
   const [leaveForm, setLeaveForm] = useState({ leave_type_id: '', start_date: '', end_date: '', reason: '' });
@@ -92,38 +118,52 @@ export default function EmployeeDashboard({ token }) {
   // Selected items for modal detail view
   const [selectedPayslip, setSelectedPayslip] = useState(null);
 
+  const fetchDocuments = async () => {
+    try {
+      const response = await axios.get(window.API_BASE_URL + '/index.php?route=/api/employee/documents', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDocuments(response.data.documents || []);
+    } catch (err) {
+      console.error("Failed to fetch documents", err);
+    }
+  };
+
   const fetchEmployeeData = async () => {
     try {
-      const dashRes = await axios.get('http://localhost:8000/index.php?route=/api/employee/dashboard', {
+      const dashRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/employee/dashboard', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDashboardData(dashRes.data);
 
-      const leaveRes = await axios.get('http://localhost:8000/index.php?route=/api/employee/leaves', {
+      const leaveRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/employee/leaves', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setLeaves(leaveRes.data.leaves);
 
-      const payRes = await axios.get('http://localhost:8000/index.php?route=/api/employee/payslips', {
+      const payRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/employee/payslips', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPayslips(payRes.data.payslips);
 
-      const profRes = await axios.get('http://localhost:8000/index.php?route=/api/employee/profile', {
+      const profRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/employee/profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfile(profRes.data);
 
       // Fetch upgraded attendance states
-      const attTodayRes = await axios.get('http://localhost:8000/index.php?route=/api/attendance/today', {
+      const attTodayRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/attendance/today', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTodayAttendance(attTodayRes.data.attendance);
 
-      const attHistRes = await axios.get('http://localhost:8000/index.php?route=/api/attendance/history', {
+      const attHistRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/attendance/history', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAttendanceHistory(attHistRes.data.history || []);
+
+      // Fetch employee documents
+      await fetchDocuments();
 
     } catch (err) {
       console.error("Error loading employee dashboard data", err);
@@ -138,7 +178,7 @@ export default function EmployeeDashboard({ token }) {
 
   const handleClockIn = async (locationData) => {
     try {
-      const response = await axios.post('http://localhost:8000/index.php?route=/api/employee/clockin', locationData, {
+      const response = await axios.post(window.API_BASE_URL + '/index.php?route=/api/employee/clockin', locationData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert(response.data.message);
@@ -153,7 +193,7 @@ export default function EmployeeDashboard({ token }) {
     setFormError(null);
     setFormSuccess(null);
     try {
-      const response = await axios.post('http://localhost:8000/index.php?route=/api/employee/leaves', leaveForm, {
+      const response = await axios.post(window.API_BASE_URL + '/index.php?route=/api/employee/leaves', leaveForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFormSuccess(response.data.message);
@@ -169,7 +209,7 @@ export default function EmployeeDashboard({ token }) {
     setFormError(null);
     setFormSuccess(null);
     try {
-      const response = await axios.post('http://localhost:8000/index.php?route=/api/employee/expenses', expenseForm, {
+      const response = await axios.post(window.API_BASE_URL + '/index.php?route=/api/employee/expenses', expenseForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFormSuccess(response.data.message);
@@ -177,6 +217,59 @@ export default function EmployeeDashboard({ token }) {
       fetchEmployeeData();
     } catch (err) {
       setFormError(err.response?.data?.error || "Failed to submit expense reimbursement.");
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("File size exceeds 5MB limit.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadForm(prev => ({
+        ...prev,
+        file_name: file.name,
+        file_data: reader.result
+      }));
+      setUploadError(null);
+    };
+    reader.onerror = () => {
+      setUploadError("Error reading file.");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUploadDocument = async (e) => {
+    e.preventDefault();
+    if (!uploadForm.doc_type || !uploadForm.file_name || !uploadForm.file_data) {
+      setUploadError("Please select a document type and upload a file.");
+      return;
+    }
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      await axios.post(window.API_BASE_URL + '/index.php?route=/api/employee/documents', {
+        doc_type: uploadForm.doc_type,
+        doc_number: uploadForm.doc_number,
+        file_name: uploadForm.file_name,
+        file_data: uploadForm.file_data
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setUploadForm({ doc_type: 'PAN Card', doc_number: '', file_name: '', file_data: '' });
+      setShowUploadModal(false);
+      await fetchDocuments();
+    } catch (err) {
+      setUploadError(err.response?.data?.error || "Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -328,34 +421,6 @@ export default function EmployeeDashboard({ token }) {
         <div>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>Employee Workspace</h2>
           <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Welcome back, {profile?.employee?.name}</p>
-        </div>
-        <div className="resp-tabs-container">
-          {[
-            { id: 'attendance', label: 'Attendance & Check-in' },
-            { id: 'leaves', label: 'Leave Requests' },
-            { id: 'payslips', label: 'My Payslips' },
-            { id: 'vault', label: 'My Vault' },
-            { id: 'profile', label: 'My Profile' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => { setActiveSubTab(tab.id); setFormSuccess(null); setFormError(null); }}
-              style={{
-                padding: '0.5rem 1rem',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: activeSubTab === tab.id ? '#ffffff' : 'transparent',
-                color: activeSubTab === tab.id ? '#0047B8' : '#475569',
-                fontWeight: 600,
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                boxShadow: activeSubTab === tab.id ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
-                transition: 'all 0.2s'
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -1070,7 +1135,7 @@ export default function EmployeeDashboard({ token }) {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', textAlign: 'center' }}>
                     <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=75x75&data=http://localhost:5173/login`} 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=75x75&data=${window.location.origin}/login`} 
                       alt="QR Code" 
                       style={{ width: '75px', height: '75px', border: '1px solid #e2e8f0', padding: '2px', marginBottom: '3px' }} 
                     />
@@ -1089,27 +1154,242 @@ export default function EmployeeDashboard({ token }) {
 
       {/* SUB-TAB 4: VAULT */}
       {activeSubTab === 'vault' && (
-        <div className="premium-card">
-          <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.25rem' }}>My Document Vault</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-            {[
-              { name: 'Offer Letter.pdf', size: '142 KB' },
-              { name: 'Appointment Letter.pdf', size: '185 KB' },
-              { name: 'PAN Card Copy.jpg', size: '1.2 MB' },
-              { name: 'Aadhaar Card Copy.jpg', size: '950 KB' }
-            ].map((doc, idx) => (
-              <div key={idx} style={{ padding: '1rem', border: '1px solid #cbd5e1', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.5rem', backgroundColor: '#f8fafc' }}>
-                <MdFolder size={32} color="#0047B8" />
-                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{doc.name}</div>
-                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{doc.size}</div>
-                <button style={{ backgroundColor: 'transparent', border: 'none', color: '#0047B8', cursor: 'pointer', fontWeight: 700, fontSize: '0.8rem', textAlign: 'left', padding: 0 }}>
-                  Download Copy
-                </button>
-              </div>
-            ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Employee Document Center</div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>My Document Vault</h3>
+            </div>
+            <button
+              onClick={() => {
+                setUploadForm({ doc_type: 'PAN Card', doc_number: '', file_name: '', file_data: '' });
+                setUploadError(null);
+                setShowUploadModal(true);
+              }}
+              style={{
+                backgroundColor: '#0047B8',
+                color: '#ffffff',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: '0 2px 4px rgba(0, 71, 184, 0.15)'
+              }}
+            >
+              + Add New Document
+            </button>
           </div>
+
+          <div className="premium-card">
+            {documents.length === 0 ? (
+              <div style={{ padding: '3rem 1.5rem', textAlign: 'center', color: '#64748b' }}>
+                <MdFolder size={48} color="#cbd5e1" style={{ marginBottom: '1rem' }} />
+                <h4 style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.95rem', marginBottom: '0.25rem' }}>No documents uploaded yet</h4>
+                <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Upload your official documents (PAN, Aadhaar, Passport, etc.) to keep them secure in your vault.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
+                {documents.map((doc) => (
+                  <div key={doc.id} style={{ 
+                    padding: '1.25rem', 
+                    border: '1px solid #e2e8f0', 
+                    borderRadius: '8px', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '0.5rem', 
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                    transition: 'transform 0.2s, box-shadow 0.2s'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <MdFolder size={36} color="#0047B8" />
+                      <span style={{
+                        padding: '0.2rem 0.4rem',
+                        borderRadius: '4px',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        backgroundColor: 'rgba(0, 71, 184, 0.06)',
+                        color: '#0047B8'
+                      }}>
+                        {doc.doc_type}
+                      </span>
+                    </div>
+                    <div style={{ 
+                      fontWeight: 700, 
+                      fontSize: '0.9rem', 
+                      color: '#0f172a', 
+                      textOverflow: 'ellipsis', 
+                      overflow: 'hidden', 
+                      whiteSpace: 'nowrap',
+                      marginTop: '0.25rem'
+                    }}>
+                      {doc.doc_number || 'No Reference ID'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#475569', wordBreak: 'break-all' }} title={getCleanFileName(doc.file_path)}>
+                      {getCleanFileName(doc.file_path)}
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: 'auto' }}>
+                      Uploaded: {new Date(doc.uploaded_at).toLocaleDateString()}
+                    </div>
+                    <a
+                      href={`${window.API_BASE_URL}/${doc.file_path}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ 
+                        display: 'inline-block',
+                        textDecoration: 'none',
+                        color: '#0047B8', 
+                        cursor: 'pointer', 
+                        fontWeight: 700, 
+                        fontSize: '0.8rem', 
+                        paddingTop: '0.5rem',
+                        borderTop: '1px solid #f1f5f9',
+                        marginTop: '0.25rem'
+                      }}
+                    >
+                      Download / View
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add Document Modal */}
+          {showUploadModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(15, 23, 42, 0.6)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999,
+              padding: '1rem'
+            }}>
+              <div className="premium-card" style={{ 
+                maxWidth: '450px', 
+                width: '100%', 
+                backgroundColor: '#ffffff', 
+                borderRadius: '12px', 
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                padding: '1.5rem',
+                border: '1px solid #e2e8f0'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Upload New Document</h3>
+                  <button 
+                    onClick={() => setShowUploadModal(false)} 
+                    style={{ border: 'none', backgroundColor: 'transparent', color: '#64748b', fontSize: '1.25rem', cursor: 'pointer', fontWeight: 700 }}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {uploadError && (
+                  <div style={{ padding: '0.75rem 1rem', backgroundColor: 'rgba(227,6,19,0.05)', borderRadius: '6px', color: '#E30613', fontWeight: 600, fontSize: '0.8rem', marginBottom: '1rem' }}>
+                    {uploadError}
+                  </div>
+                )}
+
+                <form onSubmit={handleUploadDocument} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>
+                      Document Type
+                    </label>
+                    <select
+                      value={uploadForm.doc_type}
+                      onChange={e => setUploadForm(prev => ({ ...prev, doc_type: e.target.value }))}
+                      style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                    >
+                      <option value="PAN Card">PAN Card</option>
+                      <option value="Aadhaar Card">Aadhaar Card</option>
+                      <option value="Passport">Passport</option>
+                      <option value="Offer Letter">Offer Letter</option>
+                      <option value="Resume">Resume</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>
+                      Reference / Document Number
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. ABCD1234E or UAN"
+                      value={uploadForm.doc_number}
+                      onChange={e => setUploadForm(prev => ({ ...prev, doc_number: e.target.value }))}
+                      style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem', color: '#475569' }}>
+                      Select File (PDF, JPG, PNG up to 5MB)
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                      onChange={handleFileChange}
+                      style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', cursor: 'pointer' }}
+                    />
+                    {uploadForm.file_name && (
+                      <div style={{ fontSize: '0.75rem', color: '#0047B8', marginTop: '0.25rem', fontWeight: 600 }}>
+                        Selected: {uploadForm.file_name}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem', justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowUploadModal(false)}
+                      style={{
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        color: '#475569',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={uploading}
+                      style={{
+                        backgroundColor: '#0047B8',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        opacity: uploading ? 0.7 : 1
+                      }}
+                    >
+                      {uploading ? 'Uploading...' : 'Upload Document'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      )
+}
 
       {/* SUB-TAB 5: PROFILE */}
       {activeSubTab === 'profile' && profile && (

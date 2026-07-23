@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import PortalSelection from './pages/PortalSelection';
-import Login from './pages/Login';
+import EmployeeLogin from './pages/EmployeeLogin';
+import HRLogin from './pages/HRLogin';
+import FinanceLogin from './pages/FinanceLogin';
+import SuperAdminLogin from './pages/SuperAdminLogin';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import HRDashboard from './pages/HRDashboard';
 import FinanceDashboard from './pages/FinanceDashboard';
 import EmployeeDashboard from './pages/EmployeeDashboard';
+import CompanyOnboarding from './pages/CompanyOnboarding';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -27,22 +31,11 @@ export default function App() {
     setUser(null);
   };
 
-  // Helper redirect to handle root entry based on role
-  const getRoleDefaultPath = (role) => {
-    switch (role) {
-      case 'superadmin': return '/superadmin';
-      case 'hr': return '/hr';
-      case 'finance': return '/finance';
-      case 'employee': return '/employee';
-      default: return '/login';
-    }
-  };
-
   return (
     <ErrorBoundary>
       <Router>
         <Routes>
-          {/* Employee Route */}
+          {/* Dashboard Portal Routes */}
           <Route 
             path="/employee/*" 
             element={
@@ -55,30 +48,32 @@ export default function App() {
                   <Navigate to={`/${user.role}`} replace />
                 )
               ) : (
-                <Login onLoginSuccess={handleLoginSuccess} initialRole="employee" />
+                <Navigate to="/login/employee" replace />
               )
             } 
           />
 
-          {/* HR Route */}
           <Route 
             path="/hr/*" 
             element={
               token ? (
                 user?.role === 'hr' ? (
-                  <Layout user={user} onLogout={handleLogout}>
-                    <HRDashboard token={token} />
-                  </Layout>
+                  parseInt(user?.onboarding_completed) === 0 ? (
+                    <CompanyOnboarding token={token} user={user} onOnboardingSuccess={handleLoginSuccess} />
+                  ) : (
+                    <Layout user={user} onLogout={handleLogout}>
+                      <HRDashboard token={token} />
+                    </Layout>
+                  )
                 ) : (
                   <Navigate to={`/${user.role}`} replace />
                 )
               ) : (
-                <Login onLoginSuccess={handleLoginSuccess} initialRole="hr" />
+                <Navigate to="/login/hr" replace />
               )
             } 
           />
 
-          {/* CA / Finance Route */}
           <Route 
             path="/finance/*" 
             element={
@@ -91,12 +86,11 @@ export default function App() {
                   <Navigate to={`/${user.role}`} replace />
                 )
               ) : (
-                <Login onLoginSuccess={handleLoginSuccess} initialRole="finance" />
+                <Navigate to="/login/finance" replace />
               )
             } 
           />
 
-          {/* Superadmin Route */}
           <Route 
             path="/superadmin/*" 
             element={
@@ -109,35 +103,48 @@ export default function App() {
                   <Navigate to={`/${user.role}`} replace />
                 )
               ) : (
-                <Login onLoginSuccess={handleLoginSuccess} initialRole="superadmin" />
+                <Navigate to="/login/superadmin" replace />
               )
             } 
           />
 
-          {/* Legacy / Helper Login Redirects */}
-          <Route path="/login/superadmin" element={<Navigate to="/superadmin" replace />} />
-          <Route path="/login/hr" element={<Navigate to="/hr" replace />} />
-          <Route path="/login/finance" element={<Navigate to="/finance" replace />} />
-          <Route path="/login/ca" element={<Navigate to="/finance" replace />} />
-          <Route path="/login/employee" element={<Navigate to="/employee" replace />} />
-          <Route path="/login" element={<Navigate to="/employee" replace />} />
-
-          {/* Registration / Wizard Route */}
+          {/* Secure Gateways for Separate Logins */}
           <Route 
-            path="/register" 
+            path="/login/employee" 
             element={
-              <Login onLoginSuccess={handleLoginSuccess} initialRole="hr" initialTab="register" />
+              token ? <Navigate to="/employee" replace /> : <EmployeeLogin onLoginSuccess={handleLoginSuccess} />
+            } 
+          />
+          <Route 
+            path="/login/hr" 
+            element={
+              token ? <Navigate to="/hr" replace /> : <HRLogin onLoginSuccess={handleLoginSuccess} />
+            } 
+          />
+          <Route 
+            path="/login/finance" 
+            element={
+              token ? <Navigate to="/finance" replace /> : <FinanceLogin onLoginSuccess={handleLoginSuccess} />
+            } 
+          />
+          <Route 
+            path="/login/superadmin" 
+            element={
+              token ? <Navigate to="/superadmin" replace /> : <SuperAdminLogin onLoginSuccess={handleLoginSuccess} />
             } 
           />
 
           {/* Fallbacks */}
+          <Route path="/login/ca" element={<Navigate to="/login/finance" replace />} />
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          
           <Route 
             path="/" 
             element={
               token && user ? (
                 <Navigate to={`/${user.role}`} replace />
               ) : (
-                <Navigate to="/employee" replace />
+                <PortalSelection />
               )
             } 
           />
@@ -148,7 +155,7 @@ export default function App() {
               token && user ? (
                 <Navigate to={`/${user.role}`} replace />
               ) : (
-                <Navigate to="/employee" replace />
+                <Navigate to="/" replace />
               )
             } 
           />

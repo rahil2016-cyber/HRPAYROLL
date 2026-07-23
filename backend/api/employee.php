@@ -260,6 +260,76 @@ elseif ($action === 'expenses') {
         empResponse(201, ['message' => 'Expense reimbursement claim submitted successfully']);
     }
 }
+elseif ($action === 'documents') {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        $stmt = $db->prepare("SELECT * FROM employee_documents WHERE employee_id = ? ORDER BY id DESC");
+        $stmt->execute([$employee_id]);
+        empResponse(200, ['documents' => $stmt->fetchAll()]);
+    }
+    
+    elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $doc_type = $input['doc_type'] ?? '';
+        $doc_number = $input['doc_number'] ?? '';
+        $file_name = $input['file_name'] ?? '';
+        $file_data = $input['file_data'] ?? ''; // base64 payload
+
+        if (empty($doc_type) || empty($file_name) || empty($file_data)) {
+            empResponse(400, ['error' => 'Document type, file name, and file content are required']);
+        }
+
+        // Validate base64 payload
+        if (strpos($file_data, 'data:') === 0) {
+            $parts = explode(',', $file_data);
+            if (count($parts) >= 2) {
+                $file_data = $parts[1];
+            } else {
+                empResponse(400, ['error' => 'Invalid file data format']);
+            }
+        }
+
+        $decodedData = base64_decode($file_data);
+        if ($decodedData === false) {
+            empResponse(400, ['error' => 'Failed to decode file data']);
+        }
+
+        // Determine unique file name
+        $extension = pathinfo($file_name, PATHINFO_EXTENSION);
+        if (empty($extension)) {
+            $extension = 'pdf'; // fallback
+        }
+        
+        // Clean special characters from file name but keep basename (without extension)
+        $cleanName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', pathinfo($file_name, PATHINFO_FILENAME));
+        $uniqueFileName = 'doc_' . $employee_id . '_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '_' . $cleanName . '.' . $extension;
+
+        // Path settings
+        $uploadDir = __DIR__ . '/../uploads/documents/';
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $targetPath = $uploadDir . $uniqueFileName;
+        if (file_put_contents($targetPath, $decodedData) === false) {
+            empResponse(500, ['error' => 'Failed to save document to storage']);
+        }
+
+        $relativeFilePath = 'uploads/documents/' . $uniqueFileName;
+
+        // Insert into database
+        $stmt = $db->prepare("INSERT INTO employee_documents (employee_id, doc_type, doc_number, file_path) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$employee_id, $doc_type, $doc_number, $relativeFilePath]);
+
+        empResponse(201, [
+            'message' => 'Document uploaded successfully',
+            'document' => [
+                'doc_type' => $doc_type,
+                'doc_number' => $doc_number,
+                'file_path' => $relativeFilePath,
+                'uploaded_at' => date('Y-m-d H:i:s')
+            ]
+        ]);
+    }
+}
 
 elseif ($action === 'profile') {
     // Detailed profile details

@@ -24,21 +24,27 @@ if ($action === 'login') {
     $password = $input['password'] ?? '';
 
     if (empty($email) || empty($password)) {
-        sendResponse(400, ['error' => 'Email and password are required']);
+        sendResponse(400, ['error' => 'Username/Email and password are required']);
     }
 
-    $stmt = $db->prepare("SELECT * FROM users WHERE email = ? AND status = 'Active'");
-    $stmt->execute([$email]);
+    // Lookup user by email OR employee_code
+    $stmt = $db->prepare("
+        SELECT u.* 
+        FROM users u 
+        LEFT JOIN employees e ON u.id = e.user_id 
+        WHERE (u.email = ? OR e.employee_code = ?) AND u.status = 'Active'
+    ");
+    $stmt->execute([$email, $email]);
     $userRecord = $stmt->fetch();
 
     if (!$userRecord || !password_verify($password, $userRecord['password_hash'])) {
-        sendResponse(401, ['error' => 'Invalid email or password']);
+        sendResponse(401, ['error' => 'Invalid credentials']);
     }
 
     // Get employee details if user is not superadmin
     $employeeRecord = null;
     if ($userRecord['role'] !== 'superadmin') {
-        $empStmt = $db->prepare("SELECT e.*, c.name as company_name, c.code as company_code FROM employees e JOIN companies c ON e.company_id = c.id WHERE e.user_id = ?");
+        $empStmt = $db->prepare("SELECT e.*, c.name as company_name, c.code as company_code, c.onboarding_completed FROM employees e JOIN companies c ON e.company_id = c.id WHERE e.user_id = ?");
         $empStmt->execute([$userRecord['id']]);
         $employeeRecord = $empStmt->fetch();
     }
@@ -51,7 +57,8 @@ if ($action === 'login') {
         'name' => $userRecord['name'],
         'company_id' => $employeeRecord ? $employeeRecord['company_id'] : null,
         'employee_id' => $employeeRecord ? $employeeRecord['id'] : null,
-        'branch_id' => $employeeRecord ? $employeeRecord['branch_id'] : null
+        'branch_id' => $employeeRecord ? $employeeRecord['branch_id'] : null,
+        'onboarding_completed' => $employeeRecord ? (int)$employeeRecord['onboarding_completed'] : 0
     ];
 
     $token = JWT::generate($tokenPayload);
@@ -67,7 +74,8 @@ if ($action === 'login') {
             'avatar' => $userRecord['avatar'],
             'company_name' => $employeeRecord ? $employeeRecord['company_name'] : null,
             'employee_code' => $employeeRecord ? $employeeRecord['employee_code'] : null,
-            'employee_id' => $employeeRecord ? $employeeRecord['id'] : null
+            'employee_id' => $employeeRecord ? $employeeRecord['id'] : null,
+            'onboarding_completed' => $employeeRecord ? (int)$employeeRecord['onboarding_completed'] : 0
         ]
     ]);
 }

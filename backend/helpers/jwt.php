@@ -1,8 +1,16 @@
 <?php
 // backend/helpers/jwt.php
 
+require_once __DIR__ . '/env.php';
+
 class JWT {
-    private static $secret = 'HR_Payroll_Enterprise_Secret_Key_2026';
+    private static $secret = null;
+
+    private static function initSecret() {
+        if (self::$secret === null) {
+            self::$secret = env('JWT_SECRET', 'HR_Payroll_Enterprise_Secret_Key_2026');
+        }
+    }
 
     private static function base64UrlEncode($data) {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($data));
@@ -17,6 +25,7 @@ class JWT {
     }
 
     public static function generate($payload) {
+        self::initSecret();
         $header = json_encode([
             'typ' => 'JWT',
             'alg' => 'HS256'
@@ -37,6 +46,7 @@ class JWT {
     }
 
     public static function verify($token) {
+        self::initSecret();
         $parts = explode('.', $token);
         if (count($parts) !== 3) {
             return false;

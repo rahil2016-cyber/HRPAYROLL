@@ -26,6 +26,7 @@ try {
         status VARCHAR(20) DEFAULT 'Active', -- Active, Suspended
         plan_name VARCHAR(50) DEFAULT 'Trial',
         subscription_end $dateTimeType,
+        service_type VARCHAR(50) DEFAULT 'CompletePayroll',
         created_at TIMESTAMP DEFAULT $dateTimeNow
     )";
 

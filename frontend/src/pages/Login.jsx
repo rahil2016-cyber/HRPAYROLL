@@ -68,7 +68,7 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
             <div className="mockup-grid">
               <div className="mockup-card">
                 <span className="mockup-card-title">Total Payroll Cost</span>
-                <span className="mockup-card-value">$48,250</span>
+                <span className="mockup-card-value">₹48,250</span>
                 <span style={{ fontSize: '0.55rem', color: '#94a3b8' }}>July 2026 Cycle</span>
               </div>
               <div className="mockup-card">
@@ -160,11 +160,11 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
               <div className="mockup-list" style={{ marginTop: '0.2rem' }}>
                 <div className="mockup-list-item">
                   <span className="mockup-list-item-title">Payslip_2026_APR.pdf</span>
-                  <span className="mockup-list-item-status" style={{ color: '#10b981' }}>$3,420 (Net)</span>
+                  <span className="mockup-list-item-status" style={{ color: '#10b981' }}>₹3,420 (Net)</span>
                 </div>
                 <div className="mockup-list-item">
                   <span className="mockup-list-item-title">Payslip_2026_MAR.pdf</span>
-                  <span className="mockup-list-item-status" style={{ color: '#10b981' }}>$3,420 (Net)</span>
+                  <span className="mockup-list-item-status" style={{ color: '#10b981' }}>₹3,420 (Net)</span>
                 </div>
               </div>
             </div>
@@ -271,7 +271,7 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post('http://localhost:8000/index.php?route=/api/auth/login', {
+      const response = await axios.post(window.API_BASE_URL + '/index.php?route=/api/auth/login', {
         email,
         password
       });
@@ -294,7 +294,7 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
     setLoading(true);
     setError(null);
     try {
-      await axios.post('http://localhost:8000/index.php?route=/api/auth/register-wizard', wizardData);
+      await axios.post(window.API_BASE_URL + '/index.php?route=/api/auth/register-wizard', wizardData);
       setWizardSuccess(true);
     } catch (err) {
       setError(err.response?.data?.error || 'Registration wizard failed. Please try again.');
@@ -805,7 +805,7 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
                 <div className="mockup-dot"></div>
                 <div className="mockup-dot"></div>
               </div>
-              <div className="mockup-title-bar">localhost:5173/{roleMode}</div>
+              <div className="mockup-title-bar">{window.location.host}/{roleMode}</div>
             </div>
             <div className="mockup-body">
               <div className="mockup-sidebar">
