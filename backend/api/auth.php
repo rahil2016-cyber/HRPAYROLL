@@ -165,6 +165,30 @@ elseif ($action === 'register-wizard') {
     }
 }
 
+elseif ($action === 'book-demo') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        sendResponse(405, ['error' => 'Method not allowed']);
+    }
+
+    $name = $input['name'] ?? '';
+    $email = $input['email'] ?? '';
+    $company_name = $input['company_name'] ?? '';
+    $phone = $input['phone'] ?? '';
+    $message = $input['message'] ?? '';
+
+    if (empty($name) || empty($email) || empty($company_name)) {
+        sendResponse(400, ['error' => 'Name, email and company name are required']);
+    }
+
+    try {
+        $stmt = $db->prepare("INSERT INTO demo_requests (name, email, company_name, phone, message) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$name, $email, $company_name, $phone, $message]);
+        sendResponse(201, ['message' => 'Demo booked successfully']);
+    } catch (Exception $e) {
+        sendResponse(500, ['error' => 'Failed to book demo', 'details' => $e->getMessage()]);
+    }
+}
+
 elseif ($action === 'me') {
     if (!$user) {
         sendResponse(401, ['error' => 'Not authenticated']);

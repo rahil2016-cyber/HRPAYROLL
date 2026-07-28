@@ -26,7 +26,8 @@ export default function Layout({ user, children, onLogout }) {
           { label: 'Companies', path: '/superadmin/companies', icon: MdBusiness },
           { label: 'CA Management', path: '/superadmin/cas', icon: MdPeople },
           { label: 'Subscription Plans', path: '/superadmin/plans', icon: MdCreditCard },
-          { label: 'Support Tickets', path: '/superadmin/tickets', icon: MdBugReport }
+          { label: 'Support Tickets', path: '/superadmin/tickets', icon: MdBugReport },
+          { label: 'Demo Requests', path: '/superadmin/demo-requests', icon: MdConfirmationNumber }
         ];
       case 'hr':
         return [

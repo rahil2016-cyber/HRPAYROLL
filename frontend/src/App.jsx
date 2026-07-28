@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
 import PortalSelection from './pages/PortalSelection';
 import EmployeeLogin from './pages/EmployeeLogin';
 import HRLogin from './pages/HRLogin';
@@ -30,6 +31,22 @@ export default function App() {
     setToken(null);
     setUser(null);
   };
+
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response && error.response.status === 401) {
+          handleLogout();
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, []);
+
 
   return (
     <ErrorBoundary>

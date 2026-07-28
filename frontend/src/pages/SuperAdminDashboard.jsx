@@ -33,6 +33,7 @@ export default function SuperAdminDashboard({ token }) {
   const [tickets, setTickets] = useState([]);
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [demoRequests, setDemoRequests] = useState([]);
 
   // CA Module States
   const [cas, setCas] = useState([]);
@@ -138,10 +139,30 @@ export default function SuperAdminDashboard({ token }) {
       });
       setAuditLogs(logsRes.data.logs);
 
+      // 6. Fetch Demo Requests
+      const demoRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/superadmin/demo-requests', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDemoRequests(demoRes.data.requests);
+
     } catch (err) {
       console.error("Error loading superadmin dashboard data", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteDemoRequest = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this demo request?")) {
+      return;
+    }
+    try {
+      await axios.delete(window.API_BASE_URL + `/index.php?route=/api/superadmin/demo-requests&id=${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchDashboardData();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to delete demo request');
     }
   };
 
@@ -1166,6 +1187,71 @@ export default function SuperAdminDashboard({ token }) {
                 <button type="submit" style={{ padding: '0.55rem 1rem', backgroundColor: '#0047B8', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Save Assignment</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 6. DEMO REQUESTS VIEW */}
+      {subTab === 'demo-requests' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div>
+            <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.25rem', fontWeight: 600 }}>
+              Super Admin Portal / Demo Requests
+            </div>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' }}>Booked Demo Sessions</h2>
+          </div>
+
+          <div className="premium-card">
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#475569', fontWeight: 600 }}>
+                  <th style={{ padding: '0.75rem 0.5rem' }}>Name</th>
+                  <th style={{ padding: '0.75rem 0.5rem' }}>Email</th>
+                  <th style={{ padding: '0.75rem 0.5rem' }}>Company</th>
+                  <th style={{ padding: '0.75rem 0.5rem' }}>Phone</th>
+                  <th style={{ padding: '0.75rem 0.5rem' }}>Message</th>
+                  <th style={{ padding: '0.75rem 0.5rem' }}>Date</th>
+                  <th style={{ padding: '0.75rem 0.5rem', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {demoRequests.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                      No demo requests have been booked yet.
+                    </td>
+                  </tr>
+                ) : (
+                  demoRequests.map((req) => (
+                    <tr key={req.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '0.75rem 0.5rem', fontWeight: 600, color: '#0f172a' }}>{req.name}</td>
+                      <td style={{ padding: '0.75rem 0.5rem' }}>{req.email}</td>
+                      <td style={{ padding: '0.75rem 0.5rem' }}>{req.company_name}</td>
+                      <td style={{ padding: '0.75rem 0.5rem' }}>{req.phone || 'N/A'}</td>
+                      <td style={{ padding: '0.75rem 0.5rem', maxWidth: '240px', wordBreak: 'break-word' }}>{req.message || 'N/A'}</td>
+                      <td style={{ padding: '0.75rem 0.5rem' }}>{new Date(req.created_at).toLocaleString()}</td>
+                      <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right' }}>
+                        <button
+                          onClick={() => handleDeleteDemoRequest(req.id)}
+                          style={{
+                            backgroundColor: '#fee2e2',
+                            color: '#ef4444',
+                            border: 'none',
+                            padding: '0.35rem 0.75rem',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '0.75rem'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

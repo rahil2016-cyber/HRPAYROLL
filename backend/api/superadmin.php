@@ -656,6 +656,31 @@ elseif ($action === 'audit-logs') {
     }
 }
 
+elseif ($action === 'demo-requests') {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        try {
+            $requests = $db->query("SELECT * FROM demo_requests ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
+            jsonResponse(200, ['requests' => $requests]);
+        } catch (Exception $e) {
+            jsonResponse(500, ['error' => 'Failed to retrieve demo requests', 'details' => $e->getMessage()]);
+        }
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+        $id = $_GET['id'] ?? $input['id'] ?? null;
+        if (!$id) {
+            jsonResponse(400, ['error' => 'ID is required']);
+        }
+        try {
+            $stmt = $db->prepare("DELETE FROM demo_requests WHERE id = ?");
+            $stmt->execute([$id]);
+            jsonResponse(200, ['message' => 'Demo request deleted successfully']);
+        } catch (Exception $e) {
+            jsonResponse(500, ['error' => 'Failed to delete demo request', 'details' => $e->getMessage()]);
+        }
+    } else {
+        jsonResponse(405, ['error' => 'Method not allowed']);
+    }
+}
+
 else {
     jsonResponse(404, ['error' => 'Superadmin endpoint not found']);
 }

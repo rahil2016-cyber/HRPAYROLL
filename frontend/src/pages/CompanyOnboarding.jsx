@@ -119,7 +119,7 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
       { name: 'Finance Manager' }
     ],
     locations: [
-      { name: 'Main HQ', address: 'Corporate Towers, Tech Hub' }
+      { name: 'Main HQ', address: 'Corporate Towers, Tech Hub', latitude: 12.9716, longitude: 77.5946, radius_meters: 200 }
     ],
 
     // Step 9: First Admin Account
@@ -191,6 +191,34 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
     saveDraft(updated);
   };
 
+  const handleSearchAddress = async (idx) => {
+    const loc = formData.locations[idx];
+    if (!loc.address || !loc.address.trim()) {
+      alert("Please enter address details before searching.");
+      return;
+    }
+    try {
+      const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(loc.address)}`);
+      if (response.data && response.data.length > 0) {
+        const result = response.data[0];
+        const updated = [...formData.locations];
+        updated[idx] = {
+          ...updated[idx],
+          latitude: parseFloat(result.lat),
+          longitude: parseFloat(result.lon),
+          address: result.display_name
+        };
+        const newFormData = { ...formData, locations: updated };
+        setFormData(newFormData);
+        saveDraft(newFormData);
+      } else {
+        alert("Location not found. Please try a more general search term.");
+      }
+    } catch (err) {
+      alert("Error searching location. Please manually enter latitude and longitude.");
+    }
+  };
+
   // Base64 file uploader
   const handleFileUpload = (e, field) => {
     const file = e.target.files[0];
@@ -224,22 +252,7 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
       else if (!/^\d{6}$/.test(formData.pin_code)) errors.pin_code = "PIN Code must be exactly 6 digits";
     }
     if (step === 3) {
-      // GST Number format: 15 digits e.g. 22AAAAA0000A1Z5
-      if (formData.gst_number && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(formData.gst_number)) {
-        errors.gst_number = "Invalid GSTIN format (e.g. 22AAAAA0000A1Z5)";
-      }
-      // PAN Number format: 10 chars e.g. ABCDE1234F
-      if (formData.pan_number && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.pan_number)) {
-        errors.pan_number = "Invalid PAN format (e.g. ABCDE1234F)";
-      }
-      // TAN Number format: 10 chars e.g. ABCD12345E
-      if (formData.tan_number && !/^[A-Z]{4}[0-9]{5}[A-Z]{1}$/.test(formData.tan_number)) {
-        errors.tan_number = "Invalid TAN format (e.g. ABCD12345E)";
-      }
-      // CIN format (optional)
-      if (formData.cin_number && !/^[UuLl][0-9]{5}[A-Za-z]{2}[0-9]{4}[A-Za-z]{3}[0-9]{6}$/.test(formData.cin_number)) {
-        errors.cin_number = "Invalid CIN format";
-      }
+      // Compliance inputs are fully optional and accept any format
     }
     if (step === 6) {
       if (!formData.authorized_signatory_name.trim()) errors.authorized_signatory_name = "Authorized Signatory Name is required";
@@ -579,6 +592,7 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Company Type</label>
                   <select value={formData.company_type} onChange={e => handleInputChange('company_type', e.target.value)} style={{ width: '100%', padding: '0.55rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', backgroundColor: '#fff' }}>
                     <option value="Private Limited">Private Limited</option>
+                    <option value="Co-operative Housing Society">Co-operative Housing Society</option>
                     <option value="LLP">LLP</option>
                     <option value="Partnership">Partnership</option>
                     <option value="Proprietorship">Proprietorship</option>
@@ -751,11 +765,13 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Monthly Salary Pay Date</label>
                   <select value={formData.salary_pay_date} onChange={e => handleInputChange('salary_pay_date', e.target.value)} style={{ width: '100%', padding: '0.55rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', backgroundColor: '#fff' }}>
-                    <option value="25">25th of the month</option>
-                    <option value="28">28th of the month</option>
-                    <option value="30">Last day of the month</option>
-                    <option value="5">5th of the next month</option>
-                    <option value="10">10th of the next month</option>
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
+                      const suffix = day === 1 || day === 21 || day === 31 ? 'st' : (day === 2 || day === 22 ? 'nd' : (day === 3 || day === 23 ? 'rd' : 'th'));
+                      return <option key={day} value={day}>{day}{suffix} of the month</option>;
+                    })}
+                    <option value="Last day of the month">Last day of the month</option>
+                    <option value="5th of the next month">5th of the next month</option>
+                    <option value="10th of the next month">10th of the next month</option>
                   </select>
                 </div>
               </div>
@@ -1065,18 +1081,59 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.25rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <strong style={{ fontSize: '0.9rem', color: '#334155' }}>Office Locations Setup</strong>
-                  <button type="button" onClick={() => addNestedRow('locations', { name: '', address: '' })} style={{ border: 'none', backgroundColor: 'transparent', color: '#0047B8', cursor: 'pointer', fontWeight: 700, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <button type="button" onClick={() => addNestedRow('locations', { name: '', address: '', latitude: 12.9716, longitude: 77.5946, radius_meters: 200 })} style={{ border: 'none', backgroundColor: 'transparent', color: '#0047B8', cursor: 'pointer', fontWeight: 700, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                     <MdAdd /> Add Location
                   </button>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {formData.locations.map((loc, idx) => (
-                    <div key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                      <input type="text" required value={loc.name} onChange={e => handleNestedChange('locations', idx, 'name', e.target.value)} placeholder="Location Label (e.g. Mumbai Branch)" style={{ flex: 1, padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }} />
-                      <input type="text" value={loc.address} onChange={e => handleNestedChange('locations', idx, 'address', e.target.value)} placeholder="Branch Address Details" style={{ flex: 2, padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }} />
+                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', position: 'relative' }}>
                       {formData.locations.length > 1 && (
-                        <button type="button" onClick={() => removeNestedRow('locations', idx)} style={{ backgroundColor: 'transparent', border: 'none', color: '#E30613', cursor: 'pointer' }}><MdDelete size={18} /></button>
+                        <button type="button" onClick={() => removeNestedRow('locations', idx)} style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', backgroundColor: 'transparent', border: 'none', color: '#E30613', cursor: 'pointer' }}><MdDelete size={18} /></button>
                       )}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Location Name</label>
+                          <input type="text" required value={loc.name} onChange={e => handleNestedChange('locations', idx, 'name', e.target.value)} placeholder="e.g. Mumbai HQ" style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box' }} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Search Address Location</label>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input type="text" value={loc.address} onChange={e => handleNestedChange('locations', idx, 'address', e.target.value)} placeholder="Search location address..." style={{ flex: 1, padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box' }} />
+                            <button
+                              type="button"
+                              onClick={() => handleSearchAddress(idx)}
+                              style={{
+                                padding: '0.45rem 1rem',
+                                border: 'none',
+                                borderRadius: '4px',
+                                backgroundColor: '#0047B8',
+                                color: '#fff',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Search
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginTop: '0.25rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Latitude</label>
+                          <input type="number" step="any" value={loc.latitude ?? 12.9716} onChange={e => handleNestedChange('locations', idx, 'latitude', parseFloat(e.target.value) || 0)} placeholder="12.9716" style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box' }} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Longitude</label>
+                          <input type="number" step="any" value={loc.longitude ?? 77.5946} onChange={e => handleNestedChange('locations', idx, 'longitude', parseFloat(e.target.value) || 0)} placeholder="77.5946" style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box' }} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Radius (Meters)</label>
+                          <input type="number" value={loc.radius_meters ?? 200} onChange={e => handleNestedChange('locations', idx, 'radius_meters', parseInt(e.target.value) || 200)} placeholder="200" style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box' }} />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

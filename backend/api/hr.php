@@ -274,6 +274,28 @@ elseif ($action === 'employees') {
             }
 
             $db->commit();
+
+            // Send congratulations email with credentials
+            try {
+                $subject = "Successful Onboarding - HR Allocate";
+                $msg = "Congrats " . $name . "!\n\n";
+                $msg .= "Your onboarding has been completed successfully.\n\n";
+                $msg .= "Here are your login credentials:\n";
+                $msg .= "Unique Employee ID: " . $employee_code . "\n";
+                $msg .= "Username/Email: " . $email . "\n";
+                $msg .= "Temporary Password: " . $password . "\n\n";
+                $msg .= "You can log in to your Employee Workspace now.\n\n";
+                $msg .= "Best regards,\nHR Allocate Team";
+
+                $headers = "From: hr-allocate@yourdomain.com\r\n";
+                $headers .= "Reply-To: hr-allocate@yourdomain.com\r\n";
+                $headers .= "X-Mailer: PHP/" . phpversion();
+
+                @mail($email, $subject, $msg, $headers);
+            } catch (Exception $mailEx) {
+                // Ignore mail sending errors to prevent blocking the onboarding response
+            }
+
             hrResponse(201, [
                 'message' => 'Employee onboarded successfully via Wizard', 
                 'employee_id' => $empId,
@@ -830,8 +852,11 @@ elseif ($action === 'onboarding/submit') {
         if (!empty($input['locations']) && is_array($input['locations'])) {
             foreach ($input['locations'] as $loc) {
                 if (!empty($loc['name'])) {
+                    $lat = (float)($loc['latitude'] ?? 12.9716);
+                    $lng = (float)($loc['longitude'] ?? 77.5946);
+                    $radius = (int)($loc['radius_meters'] ?? 200);
                     $lStmt = $db->prepare("INSERT INTO branches (company_id, name, address, latitude, longitude, radius_meters) VALUES (?, ?, ?, ?, ?, ?)");
-                    $lStmt->execute([$company_id, $loc['name'], $loc['address'] ?? '', 12.9716, 77.5946, 200]);
+                    $lStmt->execute([$company_id, $loc['name'], $loc['address'] ?? '', $lat, $lng, $radius]);
                 }
             }
         }

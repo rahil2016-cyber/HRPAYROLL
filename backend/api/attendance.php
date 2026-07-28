@@ -214,13 +214,11 @@ elseif ($action === 'checkin') {
             $allowedRadius = (int)$branch['radius_meters'];
 
             if ($distance > $allowedRadius) {
-                apiResponse(400, [
-                    'error' => 'Geofence Verification Failed: You are outside the office radius.',
-                    'distance_meters' => round($distance, 1),
-                    'allowed_radius' => $allowedRadius
-                ]);
+                // Allow check-in from any location but mark gps_verified = 0
+                $gps_verified = 0;
+            } else {
+                $gps_verified = 1;
             }
-            $gps_verified = 1;
         } else {
             // WFH bypasses radius checks
             $gps_verified = 1;
@@ -367,13 +365,11 @@ elseif ($action === 'checkout') {
             $allowedRadius = (int)$branch['radius_meters'];
 
             if ($distance > $allowedRadius) {
-                apiResponse(400, [
-                    'error' => 'Geofence Verification Failed: You are outside the office radius.',
-                    'distance_meters' => round($distance, 1),
-                    'allowed_radius' => $allowedRadius
-                ]);
+                // Allow check-out from any location but mark gps_verified = 0
+                $gps_verified = 0;
+            } else {
+                $gps_verified = 1;
             }
-            $gps_verified = 1;
         } else {
             $gps_verified = 1;
         }

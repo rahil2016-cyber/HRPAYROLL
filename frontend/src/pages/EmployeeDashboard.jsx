@@ -411,7 +411,7 @@ export default function EmployeeDashboard({ token }) {
     );
   }
 
-  const { today_attendance, leave_balances, announcements, settings } = dashboardData;
+  const { today_attendance = null, leave_balances = [], announcements = [], settings = {} } = dashboardData || {};
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

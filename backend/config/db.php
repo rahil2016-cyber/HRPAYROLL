@@ -63,6 +63,19 @@ class Database {
             } catch (PDOException $ex) {
                 // ignore if already exists
             }
+            try {
+                self::$conn->exec("CREATE TABLE IF NOT EXISTS demo_requests (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    email VARCHAR(100) NOT NULL,
+                    company_name VARCHAR(100) NOT NULL,
+                    phone VARCHAR(20),
+                    message TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )");
+            } catch (PDOException $ex) {
+                // ignore if already exists
+            }
             return self::$conn;
         } catch (PDOException $e) {
             // If MySQL fails, fallback to local SQLite database in the backend directory
@@ -115,6 +128,19 @@ class Database {
                 }
                 try {
                     self::$conn->exec("ALTER TABLE companies ADD COLUMN service_type VARCHAR(50) DEFAULT 'CompletePayroll'");
+                } catch (PDOException $ex) {
+                    // ignore if already exists
+                }
+                try {
+                    self::$conn->exec("CREATE TABLE IF NOT EXISTS demo_requests (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT NOT NULL,
+                        email TEXT NOT NULL,
+                        company_name TEXT NOT NULL,
+                        phone TEXT,
+                        message TEXT,
+                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                    )");
                 } catch (PDOException $ex) {
                     // ignore if already exists
                 }

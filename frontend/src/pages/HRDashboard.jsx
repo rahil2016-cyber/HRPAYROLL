@@ -903,6 +903,57 @@ export default function HRDashboard({ token }) {
     }
   };
 
+  const handleExportAttendance = () => {
+    if (hrAttendanceRecords.length === 0) {
+      alert("No attendance records to export.");
+      return;
+    }
+    
+    const headers = [
+      "Employee ID",
+      "Name",
+      "Department",
+      "Date",
+      "Clock In",
+      "Clock Out",
+      "WFH Mode",
+      "GPS Verified",
+      "Face Verified",
+      "Liveness Verified",
+      "Clock-in Distance (meters)",
+      "Daily Status"
+    ];
+
+    const rows = hrAttendanceRecords.map(att => [
+      att.employee_code || '',
+      att.employee_name || '',
+      att.department_name || 'General',
+      att.date || '',
+      att.clock_in || '--:--',
+      att.clock_out || '--:--',
+      att.is_wfh === 1 ? 'Yes' : 'No',
+      att.clock_in_gps_verified ? 'Yes' : 'No',
+      att.clock_in_face_verified ? 'Yes' : 'No',
+      att.clock_in_liveness_verified ? 'Yes' : 'No',
+      att.is_wfh === 1 ? '0' : Math.round(att.clock_in_distance || 0),
+      att.status || ''
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `attendance_export_${new Date().toISOString().substring(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return <div className="skeleton" style={{ height: '300px', width: '100%', marginTop: '1rem' }} />;
   }
@@ -1152,7 +1203,31 @@ export default function HRDashboard({ token }) {
 
             {/* Table list */}
             <div className="premium-card" style={{ padding: '1.5rem' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginBottom: '1.25rem' }}>Daily Attendance Roster</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Daily Attendance Roster</h3>
+                <button
+                  type="button"
+                  onClick={handleExportAttendance}
+                  style={{
+                    backgroundColor: '#10b981',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '6px',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = '#059669'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = '#10b981'}
+                >
+                  Export to Excel (CSV)
+                </button>
+              </div>
               <div className="table-container">
                 <table className="custom-table">
                   <thead>
