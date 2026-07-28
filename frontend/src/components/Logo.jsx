@@ -5,16 +5,16 @@ export default function Logo({ width = 160, height = 40 }) {
     <svg 
       width={width} 
       height={height} 
-      viewBox="0 0 200 50" 
+      viewBox="0 0 220 50" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
       style={{ display: 'inline-block', verticalAlign: 'middle' }}
     >
-      {/* "HR" Text in Primary Red */}
+      {/* "HR" Text in Primary Blue */}
       <text 
         x="10" 
         y="35" 
-        fill="#E30613" 
+        fill="#0047B8" 
         fontFamily="'Inter', sans-serif" 
         fontWeight="800" 
         fontSize="30" 
@@ -22,7 +22,7 @@ export default function Logo({ width = 160, height = 40 }) {
       >
         HR
       </text>
-      {/* "Payroll" Text in Primary Blue */}
+      {/* "Allocate" Text in Primary Blue */}
       <text 
         x="60" 
         y="35" 
@@ -32,10 +32,10 @@ export default function Logo({ width = 160, height = 40 }) {
         fontSize="30" 
         letterSpacing="-0.03em"
       >
-        Payroll
+        Allocate
       </text>
-      {/* Decorative clean underdot in Red */}
-      <circle cx="185" cy="31" r="4.5" fill="#E30613" />
+      {/* Decorative clean underdot in Blue */}
+      <circle cx="205" cy="31" r="4.5" fill="#0047B8" />
     </svg>
   );
 }

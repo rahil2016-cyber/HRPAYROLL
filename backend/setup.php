@@ -629,7 +629,7 @@ try {
     $settingsCount = $db->query("SELECT COUNT(*) FROM settings")->fetchColumn();
     if ($settingsCount == 0) {
         $stmt = $db->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)");
-        $stmt->execute(['app_name', 'HR Payroll']);
+        $stmt->execute(['app_name', 'HR Allocate']);
         $stmt->execute(['maintenance_mode', 'false']);
         $stmt->execute(['enable_coupons', 'true']);
         echo "Global settings seeded.\n";
@@ -701,18 +701,18 @@ try {
         $empPass = password_hash('emp123', PASSWORD_DEFAULT);
 
         // 1. Super Admin
-        $stmt->execute(['superadmin@hrpayroll.com', $adminPass, 'superadmin', 'Super Admin Manager']);
+        $stmt->execute(['superadmin@hrallocate.com', $adminPass, 'superadmin', 'Super Admin Manager']);
         
         // 2. HR Manager
-        $stmt->execute(['hr@hrpayroll.com', $hrPass, 'hr', 'John Doe (HR Manager)']);
+        $stmt->execute(['hr@hrallocate.com', $hrPass, 'hr', 'John Doe (HR Manager)']);
         $hrUserId = $db->lastInsertId();
         
         // 3. Finance Manager
-        $stmt->execute(['finance@hrpayroll.com', $finPass, 'finance', 'Sarah CA (Finance Specialist)']);
+        $stmt->execute(['finance@hrallocate.com', $finPass, 'finance', 'Sarah CA (Finance Specialist)']);
         $finUserId = $db->lastInsertId();
 
         // 4. Regular Employee
-        $stmt->execute(['employee@hrpayroll.com', $empPass, 'employee', 'Alex Mercer (Developer)']);
+        $stmt->execute(['employee@hrallocate.com', $empPass, 'employee', 'Alex Mercer (Developer)']);
         $empUserId = $db->lastInsertId();
 
         // Create entries in employee table

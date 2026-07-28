@@ -279,7 +279,7 @@ export default function Layout({ user, children, onLogout }) {
               <MdMenu size={24} />
             </button>
             <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0047B8' }}>
-              {user.company_name || 'HR Payroll Portal'}
+              {user.company_name || 'HR Allocate Portal'}
             </span>
           </div>
 

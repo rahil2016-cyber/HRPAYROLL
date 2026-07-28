@@ -177,14 +177,14 @@ export default function Login({ onLoginSuccess, initialRole, initialTab = 'login
   const getInitialCredentials = (role) => {
     switch (role) {
       case 'superadmin':
-        return { email: 'superadmin@hrpayroll.com', password: 'admin123' };
+        return { email: 'superadmin@hrallocate.com', password: 'admin123' };
       case 'hr':
-        return { email: 'hr@hrpayroll.com', password: 'hr123' };
+        return { email: 'hr@hrallocate.com', password: 'hr123' };
       case 'finance':
-        return { email: 'finance@hrpayroll.com', password: 'finance123' };
+        return { email: 'finance@hrallocate.com', password: 'finance123' };
       case 'employee':
       default:
-        return { email: 'employee@hrpayroll.com', password: 'emp123' };
+        return { email: 'employee@hrallocate.com', password: 'emp123' };
     }
   };
 
