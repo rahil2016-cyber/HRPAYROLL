@@ -22,11 +22,11 @@ export default function Logo({ width = 160, height = 40 }) {
       >
         HR
       </text>
-      {/* "Allocate" Text in Primary Blue */}
+      {/* "Allocate" Text in Primary Red */}
       <text 
         x="60" 
         y="35" 
-        fill="#0047B8" 
+        fill="#E30613" 
         fontFamily="'Inter', sans-serif" 
         fontWeight="700" 
         fontSize="30" 
@@ -34,8 +34,8 @@ export default function Logo({ width = 160, height = 40 }) {
       >
         Allocate
       </text>
-      {/* Decorative clean underdot in Blue */}
-      <circle cx="205" cy="31" r="4.5" fill="#0047B8" />
+      {/* Decorative clean underdot in Red */}
+      <circle cx="205" cy="31" r="4.5" fill="#E30613" />
     </svg>
   );
 }
