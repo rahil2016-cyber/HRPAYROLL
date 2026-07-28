@@ -66,14 +66,6 @@ export default function PortalSelection() {
       description: 'Review monthly payroll logs, configure salary details, approve expense claims, and adjust tax brackets.',
       icon: MdAttachMoney,
       route: '/login/finance'
-    },
-    {
-      id: 'superadmin',
-      title: 'Super Admin Console',
-      subtitle: 'Global Operations',
-      description: 'Register and manage client companies, assign structural permissions, and view database diagnostics.',
-      icon: MdSecurity,
-      route: '/login/superadmin'
     }
   ];
 
