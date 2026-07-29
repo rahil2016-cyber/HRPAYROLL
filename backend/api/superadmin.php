@@ -105,9 +105,23 @@ elseif ($action === 'companies') {
 
         if (isset($input['plan_name'])) {
             $plan_name = $input['plan_name'];
-            $stmt = $db->prepare("UPDATE companies SET plan_name = ? WHERE id = ?");
-            $stmt->execute([$plan_name, $company_id]);
-            jsonResponse(200, ['message' => 'Subscription plan updated to ' . $plan_name]);
+            $subscription_end = $input['subscription_end'] ?? null;
+            $service_type = $input['service_type'] ?? null;
+            
+            if ($subscription_end && $service_type) {
+                $stmt = $db->prepare("UPDATE companies SET plan_name = ?, subscription_end = ?, service_type = ? WHERE id = ?");
+                $stmt->execute([$plan_name, $subscription_end, $service_type, $company_id]);
+            } elseif ($subscription_end) {
+                $stmt = $db->prepare("UPDATE companies SET plan_name = ?, subscription_end = ? WHERE id = ?");
+                $stmt->execute([$plan_name, $subscription_end, $company_id]);
+            } elseif ($service_type) {
+                $stmt = $db->prepare("UPDATE companies SET plan_name = ?, service_type = ? WHERE id = ?");
+                $stmt->execute([$plan_name, $service_type, $company_id]);
+            } else {
+                $stmt = $db->prepare("UPDATE companies SET plan_name = ? WHERE id = ?");
+                $stmt->execute([$plan_name, $company_id]);
+            }
+            jsonResponse(200, ['message' => 'Subscription details updated successfully']);
         } else {
             $status = $input['status'] ?? 'Active'; // Active or Suspended
             $stmt = $db->prepare("UPDATE companies SET status = ? WHERE id = ?");

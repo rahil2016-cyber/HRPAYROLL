@@ -62,6 +62,7 @@ export default function SuperAdminDashboard({ token }) {
   const [newPassword, setNewPassword] = useState('');
   const [activeAssignCompany, setActiveAssignCompany] = useState(null);
   const [selectedCaId, setSelectedCaId] = useState('');
+  const [activeEditSubscriptionCompany, setActiveEditSubscriptionCompany] = useState(null);
 
   // New Company & HR creation states
   const [newCompanyForm, setNewCompanyForm] = useState({
@@ -307,6 +308,24 @@ export default function SuperAdminDashboard({ token }) {
       fetchDashboardData();
     } catch (err) {
       console.error("Error updating company subscription plan", err);
+    }
+  };
+
+  const handleSaveSubscriptionDetails = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(window.API_BASE_URL + '/index.php?route=/api/superadmin/companies', {
+        company_id: activeEditSubscriptionCompany.id,
+        plan_name: activeEditSubscriptionCompany.plan_name,
+        subscription_end: activeEditSubscriptionCompany.subscription_end,
+        service_type: activeEditSubscriptionCompany.service_type
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setActiveEditSubscriptionCompany(null);
+      fetchDashboardData();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to update subscription details');
     }
   };
 
@@ -679,6 +698,22 @@ export default function SuperAdminDashboard({ token }) {
                           ) : (
                             <span style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic', fontWeight: 600 }}>Self-Managed</span>
                           )}
+                          <button
+                            onClick={() => {
+                              let end = '';
+                              if (company.subscription_end) {
+                                const d = new Date(company.subscription_end);
+                                end = d.toISOString().split('T')[0];
+                              }
+                              setActiveEditSubscriptionCompany({
+                                ...company,
+                                subscription_end: end
+                              });
+                            }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: 'transparent', border: 'none', color: '#0047B8', cursor: 'pointer', fontWeight: 600 }}
+                          >
+                            <MdCreditCard /> Edit Subscription
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -1185,6 +1220,59 @@ export default function SuperAdminDashboard({ token }) {
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                 <button type="button" onClick={() => { setActiveAssignCompany(null); setSelectedCaId(''); }} style={{ padding: '0.55rem 1rem', backgroundColor: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
                 <button type="submit" style={{ padding: '0.55rem 1rem', backgroundColor: '#0047B8', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Save Assignment</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Subscription Modal */}
+      {activeEditSubscriptionCompany && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="premium-card" style={{ width: '100%', maxWidth: '450px', backgroundColor: '#fff', borderRadius: '12px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', color: '#0f172a' }}>Edit Company Subscription</h3>
+            <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1.25rem' }}>
+              Modify active plan details, service tiers, and subscription end dates for <strong>{activeEditSubscriptionCompany.name}</strong>.
+            </p>
+            <form onSubmit={handleSaveSubscriptionDetails}>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Subscription Plan</label>
+                <select
+                  value={activeEditSubscriptionCompany.plan_name}
+                  onChange={e => setActiveEditSubscriptionCompany({ ...activeEditSubscriptionCompany, plan_name: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff' }}
+                >
+                  <option value="Standard Trial">Standard Trial</option>
+                  <option value="Premium Growth">Premium Growth</option>
+                  <option value="Enterprise Suite">Enterprise Suite</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Service Type</label>
+                <select
+                  value={activeEditSubscriptionCompany.service_type}
+                  onChange={e => setActiveEditSubscriptionCompany({ ...activeEditSubscriptionCompany, service_type: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff' }}
+                >
+                  <option value="CompletePayroll">Complete Payroll</option>
+                  <option value="PlatformServices">Platform Services Only</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Subscription Expiry Date</label>
+                <input
+                  type="date"
+                  value={activeEditSubscriptionCompany.subscription_end || ''}
+                  onChange={e => setActiveEditSubscriptionCompany({ ...activeEditSubscriptionCompany, subscription_end: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <button type="button" onClick={() => setActiveEditSubscriptionCompany(null)} style={{ padding: '0.55rem 1rem', backgroundColor: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
+                <button type="submit" style={{ padding: '0.55rem 1rem', backgroundColor: '#0047B8', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Save Changes</button>
               </div>
             </form>
           </div>
