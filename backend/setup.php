@@ -739,7 +739,7 @@ try {
         $announceStmt->execute([$companyId, 'Updated Geofencing Policies', 'GPS clock-in is now set to 200m radius around head office.', 'Employee']);
 
         // Seed some demo attendance
-        $attStmt = $db->prepare("INSERT INTO attendance (employee_id, company_id, date, clock_in, clock_out, clock_in_lat, clock_in_lng, status, is_wfh) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $attStmt = $db->prepare("INSERT INTO attendance (employee_id, company_id, date, clock_in, clock_out, clock_in_lat, clock_in_lng, status, is_wfh) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $attStmt->execute([$empEmpId, $companyId, date('Y-m-d', strtotime('-1 day')), '09:05', '18:10', 12.9716, 77.5946, 'Present', 0]);
         $attStmt->execute([$empEmpId, $companyId, date('Y-m-d', strtotime('-2 days')), '09:12', '18:05', 12.9715, 77.5947, 'Present', 0]);
 
