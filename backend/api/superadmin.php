@@ -698,6 +698,15 @@ elseif ($action === 'demo-requests') {
 elseif ($action === 'plans') {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         try {
+            // Auto-seed plans if empty to prevent a blank UI
+            $planCount = $db->query("SELECT COUNT(*) FROM plans")->fetchColumn();
+            if ($planCount == 0) {
+                $stmt = $db->prepare("INSERT INTO plans (name, price, max_employees, features) VALUES (?, ?, ?, ?)");
+                $stmt->execute(['Standard Trial', 0.00, 10, 'Basic employee dashboard, clock-in, simple payroll']);
+                $stmt->execute(['Premium Growth', 149.00, 100, 'Geofencing check-in, full payroll, leaves workflow, asset register']);
+                $stmt->execute(['Enterprise Suite', 499.00, 9999, 'Custom geofence verification, unlimited documents, premium analytics, dedicated support']);
+            }
+
             $plans = $db->query("SELECT * FROM plans ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
             jsonResponse(200, ['plans' => $plans]);
         } catch (Exception $e) {
