@@ -70,6 +70,7 @@ export default function HRDashboard({ token }) {
     if (path.includes('/hr/settings')) return 'settings';
     if (path.includes('/hr/attendance')) return 'attendance';
     if (path.includes('/hr/payroll') || path.includes('/hr/billing')) return 'payroll-billing';
+    if (path.includes('/hr/ca-partner')) return 'ca-partner';
     return 'overview';
   };
 
@@ -83,6 +84,7 @@ export default function HRDashboard({ token }) {
     else if (tabId === 'settings') navigate('/hr/settings');
     else if (tabId === 'attendance') navigate('/hr/attendance');
     else if (tabId === 'payroll-billing') navigate('/hr/payroll');
+    else if (tabId === 'ca-partner') navigate('/hr/ca-partner');
     else navigate('/hr');
     setFormSuccess(null);
     setFormError(null);
@@ -108,6 +110,7 @@ export default function HRDashboard({ token }) {
   const [invoicesList, setInvoicesList] = useState([]);
   const [selectedCycleId, setSelectedCycleId] = useState(null);
   const [payslipsList, setPayslipsList] = useState([]);
+  const [caPartners, setCaPartners] = useState([]);
   
   // Running payroll cycle
   const [runMonth, setRunMonth] = useState(String(new Date().getMonth() + 1));
@@ -328,6 +331,24 @@ export default function HRDashboard({ token }) {
   const [formSuccess, setFormSuccess] = useState(null);
   const [formError, setFormError] = useState(null);
 
+  const [showAddCA, setShowAddCA] = useState(false);
+  const [caForm, setCaForm] = useState({
+    email: '',
+    password: '',
+    name: '',
+    firm_name: '',
+    registration_number: '',
+    gst_number: '',
+    pan_number: '',
+    mobile_number: '',
+    address: '',
+    bank_name: '',
+    account_number: '',
+    ifsc_code: '',
+    upi_id: '',
+    digital_signature: ''
+  });
+
   const handlePhotoFileSelected = (file) => {
     if (!file) return;
     const reader = new FileReader();
@@ -515,6 +536,11 @@ export default function HRDashboard({ token }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       setHrAttendanceRecords(attLogsRes.data.attendance || []);
+
+      const caPartnerRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/hr/ca-partner', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCaPartners(caPartnerRes.data.ca_partners || []);
 
     } catch (err) {
       console.error("Error loading HR dashboard data", err);
@@ -954,6 +980,42 @@ export default function HRDashboard({ token }) {
     document.body.removeChild(link);
   };
 
+  const handleCreateCAPartner = async (e) => {
+    e.preventDefault();
+    setFormError(null);
+    setFormSuccess(null);
+    try {
+      const response = await axios.post(window.API_BASE_URL + '/index.php?route=/api/hr/ca-partner', caForm, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFormSuccess(response.data.message || 'CA/Finance Partner created successfully.');
+      setCaForm({
+        email: '',
+        password: '',
+        name: '',
+        firm_name: '',
+        registration_number: '',
+        gst_number: '',
+        pan_number: '',
+        mobile_number: '',
+        address: '',
+        bank_name: '',
+        account_number: '',
+        ifsc_code: '',
+        upi_id: '',
+        digital_signature: ''
+      });
+      setShowAddCA(false);
+      
+      const caPartnerRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/hr/ca-partner', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCaPartners(caPartnerRes.data.ca_partners || []);
+    } catch (err) {
+      setFormError(err.response?.data?.error || 'Failed to create CA/Finance partner.');
+    }
+  };
+
   if (loading) {
     return <div className="skeleton" style={{ height: '300px', width: '100%', marginTop: '1rem' }} />;
   }
@@ -985,6 +1047,7 @@ export default function HRDashboard({ token }) {
           { id: 'structure', label: 'Org Structures' },
           { id: 'noticeboard', label: 'Noticeboard Manager' },
           { id: 'payroll-billing', label: 'Payroll & Invoicing' },
+          { id: 'ca-partner', label: 'CA / Finance Partner' },
           ...(activeSubTab === 'settings' ? [{ id: 'settings', label: 'Settings' }] : [])
         ].map(tab => (
           <button
@@ -3523,6 +3586,199 @@ export default function HRDashboard({ token }) {
               </form>
             )}
           </div>
+        </div>
+      )}
+
+      {/* SUB-TAB: CA / FINANCE PARTNER */}
+      {activeSubTab === 'ca-partner' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Chartered Accountant & Finance Partners</h3>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>Manage corporate accounting relations, credentials, and compliance firm configurations.</p>
+            </div>
+            {!showAddCA && (
+              <button 
+                onClick={() => setShowAddCA(true)} 
+                style={{ backgroundColor: '#0047B8', color: '#fff', border: 'none', padding: '0.6rem 1.25rem', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+              >
+                <MdAdd /> Register CA Partner
+              </button>
+            )}
+          </div>
+
+          {formSuccess && <div style={{ padding: '0.75rem 1rem', backgroundColor: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '6px', color: '#10b981', fontWeight: 600, fontSize: '0.85rem' }}>{formSuccess}</div>}
+          {formError && <div style={{ padding: '0.75rem 1rem', backgroundColor: 'rgba(227,6,19,0.05)', border: '1px solid rgba(227,6,19,0.2)', borderRadius: '6px', color: '#E30613', fontWeight: 600, fontSize: '0.85rem' }}>{formError}</div>}
+
+          {showAddCA ? (
+            <div className="premium-card" style={{ borderLeft: '4px solid #0047B8' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Register New CA Partner Profile</h4>
+                <button 
+                  onClick={() => { setShowAddCA(false); setFormError(null); setFormSuccess(null); }} 
+                  style={{ backgroundColor: '#f1f5f9', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 600, color: '#475569', fontSize: '0.8rem' }}
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateCAPartner} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <h5 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0047B8', margin: '0 0 0.5rem 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.25rem' }}>1. Login Credentials & Basic Info</h5>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>CA Partner Name *</label>
+                      <input type="text" required placeholder="e.g. Rahil CA" value={caForm.name} onChange={e => setCaForm({...caForm, name: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Email Address *</label>
+                      <input type="email" required placeholder="ca@firm.com" value={caForm.email} onChange={e => setCaForm({...caForm, email: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Password *</label>
+                      <input type="password" required placeholder="••••••••" value={caForm.password} onChange={e => setCaForm({...caForm, password: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <h5 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0047B8', margin: '0 0 0.5rem 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.25rem' }}>2. Professional & Firm Profile Details</h5>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Firm Name</label>
+                      <input type="text" placeholder="e.g. Apex Tax & Advisory" value={caForm.firm_name} onChange={e => setCaForm({...caForm, firm_name: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Registration Number</label>
+                      <input type="text" placeholder="e.g. ICAI Reg No" value={caForm.registration_number} onChange={e => setCaForm({...caForm, registration_number: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Mobile Number</label>
+                      <input type="text" placeholder="+919999988888" value={caForm.mobile_number} onChange={e => setCaForm({...caForm, mobile_number: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>GSTIN Number</label>
+                      <input type="text" placeholder="15-digit GSTIN" value={caForm.gst_number} onChange={e => setCaForm({...caForm, gst_number: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>PAN Number</label>
+                      <input type="text" placeholder="10-digit PAN" value={caForm.pan_number} onChange={e => setCaForm({...caForm, pan_number: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Digital Signature (Text/Name)</label>
+                      <input type="text" placeholder="e.g. AUTHORIZED SIGNATORY" value={caForm.digital_signature} onChange={e => setCaForm({...caForm, digital_signature: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Registered Office Address</label>
+                    <textarea rows="2" placeholder="Full address details" value={caForm.address} onChange={e => setCaForm({...caForm, address: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontFamily: 'inherit' }} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <h5 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0047B8', margin: '0 0 0.5rem 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.25rem' }}>3. Banking details (Used for invoice disbursements)</h5>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Bank Name</label>
+                      <input type="text" placeholder="e.g. ICICI Bank" value={caForm.bank_name} onChange={e => setCaForm({...caForm, bank_name: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Account Number</label>
+                      <input type="text" placeholder="Bank Account Number" value={caForm.account_number} onChange={e => setCaForm({...caForm, account_number: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>IFSC Code</label>
+                      <input type="text" placeholder="IFSC" value={caForm.ifsc_code} onChange={e => setCaForm({...caForm, ifsc_code: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>UPI ID</label>
+                      <input type="text" placeholder="ca@upi" value={caForm.upi_id} onChange={e => setCaForm({...caForm, upi_id: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.25rem' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => { setShowAddCA(false); setFormError(null); setFormSuccess(null); }} 
+                    style={{ padding: '0.6rem 1.25rem', border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#475569', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    style={{ padding: '0.6rem 1.5rem', border: 'none', backgroundColor: '#0047B8', color: '#fff', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    Register & Assign Partner
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {caPartners.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '3rem 2rem', backgroundColor: '#f8fafc', border: '2px dashed #cbd5e1', borderRadius: '12px' }}>
+                  <MdBusiness size={48} style={{ color: '#94a3b8', marginBottom: '1rem' }} />
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#334155', margin: '0 0 0.5rem 0' }}>No CA / Finance Partner Assigned</h4>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b', maxWidth: '460px', margin: '0 auto 1.5rem auto', lineHeight: '1.5' }}>
+                    Assign a Chartered Accountant or external Finance firm to delegate tax calculation parameters, monthly payroll verification runs, and professional invoice generation.
+                  </p>
+                  <button 
+                    onClick={() => setShowAddCA(true)} 
+                    style={{ backgroundColor: '#0047B8', color: '#fff', border: 'none', padding: '0.6rem 1.25rem', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Add CA Partner Now
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+                  {caPartners.map(ca => (
+                    <div key={ca.id} className="premium-card" style={{ borderLeft: '4px solid #10b981', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem' }}>
+                        <div>
+                          <strong style={{ fontSize: '1.1rem', color: '#0f172a', display: 'block' }}>{ca.firm_name || 'Individual CA Practice'}</strong>
+                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Assigned CA Representative: <strong>{ca.name}</strong></span>
+                        </div>
+                        <span style={{ padding: '0.25rem 0.5rem', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: 700, backgroundColor: 'rgba(16,185,129,0.1)', color: '#10b981' }}>
+                          ● {ca.status || 'Active'}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                        <div>
+                          <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.25rem' }}>Contact Details</span>
+                          <span style={{ fontSize: '0.85rem', display: 'block', color: '#334155' }}>📧 {ca.email}</span>
+                          <span style={{ fontSize: '0.85rem', display: 'block', color: '#334155', marginTop: '0.25rem' }}>📱 {ca.mobile_number || 'N/A'}</span>
+                        </div>
+                        <div>
+                          <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.25rem' }}>Identifiers</span>
+                          <span style={{ fontSize: '0.85rem', display: 'block', color: '#334155' }}>ICAI Reg: {ca.registration_number || 'N/A'}</span>
+                          <span style={{ fontSize: '0.85rem', display: 'block', color: '#334155', marginTop: '0.25rem' }}>GSTIN: {ca.gst_number || 'N/A'}</span>
+                          <span style={{ fontSize: '0.85rem', display: 'block', color: '#334155', marginTop: '0.25rem' }}>PAN: {ca.pan_number || 'N/A'}</span>
+                        </div>
+                        <div>
+                          <span style={{ display: 'block', fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.25rem' }}>Disbursement Bank Account</span>
+                          <span style={{ fontSize: '0.85rem', display: 'block', color: '#334155' }}>🏦 {ca.bank_name || 'N/A'}</span>
+                          <span style={{ fontSize: '0.85rem', display: 'block', color: '#334155', marginTop: '0.25rem' }}>A/C: {ca.account_number || 'N/A'}</span>
+                          <span style={{ fontSize: '0.85rem', display: 'block', color: '#334155', marginTop: '0.25rem' }}>IFSC: {ca.ifsc_code || 'N/A'}</span>
+                        </div>
+                      </div>
+
+                      {ca.address && (
+                        <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.8rem', color: '#475569' }}>
+                          <strong>Firm Office Address:</strong> {ca.address}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

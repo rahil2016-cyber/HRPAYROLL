@@ -36,6 +36,7 @@ export default function Layout({ user, children, onLogout }) {
           { label: 'Leave Applications', path: '/hr/leaves', icon: MdDateRange },
           { label: 'Departments', path: '/hr/departments', icon: MdLayers },
           { label: 'Designations', path: '/hr/designations', icon: MdWork },
+          { label: 'CA / Finance Partner', path: '/hr/ca-partner', icon: MdBusiness },
           { label: 'Settings', path: '/hr/settings', icon: MdSettings }
         ];
       case 'finance':

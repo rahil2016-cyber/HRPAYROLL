@@ -457,7 +457,7 @@ export default function PortalSelection() {
                 <MdPhone size={24} style={{ color: themeBlue }} />
                 <div>
                   <h4 style={{ margin: 0, color: themeDarkBlue, fontSize: '0.9rem' }}>Phone Assistance</h4>
-                  <p style={{ margin: 0, color: '#475569', fontSize: '0.95rem' }}>+1 (555) 019-2834</p>
+                  <p style={{ margin: 0, color: '#475569', fontSize: '0.95rem' }}>+91 98765 43210</p>
                 </div>
               </div>
 
@@ -466,7 +466,7 @@ export default function PortalSelection() {
                 <div>
                   <h4 style={{ margin: 0, color: themeDarkBlue, fontSize: '0.9rem' }}>Headquarters</h4>
                   <p style={{ margin: 0, color: '#475569', fontSize: '0.95rem' }}>
-                    Tech Center Boulevard, Suite 500, City West
+                    Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103, India
                   </p>
                 </div>
               </div>
@@ -643,7 +643,7 @@ export default function PortalSelection() {
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: themeDarkBlue }}>Phone Number</label>
                   <input
                     type="tel"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+91 XXXXX XXXXX"
                     value={demoForm.phone}
                     onChange={(e) => setDemoForm({ ...demoForm, phone: e.target.value })}
                     style={{

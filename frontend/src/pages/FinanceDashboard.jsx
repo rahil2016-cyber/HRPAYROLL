@@ -142,7 +142,14 @@ export default function FinanceDashboard({ token }) {
           monthly_revenue: dashRes.data.monthly_revenue || 0,
           recent_invoices: dashRes.data.recent_invoices || []
         });
-        setAssignedCompanies(dashRes.data.companies || []);
+        const companies = dashRes.data.companies || [];
+        setAssignedCompanies(companies);
+        if (companies.length === 1) {
+          setSelectedCompanyId(companies[0].id);
+          setSelectedCompanyName(companies[0].name);
+          setSelectedCompanyCode(companies[0].code);
+          return;
+        }
 
         const profileRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/finance/profile', {
           headers: { Authorization: `Bearer ${token}` }
@@ -638,12 +645,14 @@ export default function FinanceDashboard({ token }) {
           {/* Workspace Switcher Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0f172a', padding: '1rem 1.5rem', borderRadius: '8px', color: '#fff' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <button 
-                onClick={() => setSelectedCompanyId(null)} 
-                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: 'transparent', border: '1px solid #475569', color: '#fff', cursor: 'pointer', padding: '0.4rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}
-              >
-                <MdArrowBack /> Portfolio
-              </button>
+              {assignedCompanies.length > 1 && (
+                <button 
+                  onClick={() => setSelectedCompanyId(null)} 
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: 'transparent', border: '1px solid #475569', color: '#fff', cursor: 'pointer', padding: '0.4rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}
+                >
+                  <MdArrowBack /> Portfolio
+                </button>
+              )}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Client Context Switcher</span>
                 <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>{selectedCompanyName} ({selectedCompanyCode})</span>

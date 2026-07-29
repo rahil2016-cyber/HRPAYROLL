@@ -1357,6 +1357,87 @@ elseif ($action === 'cycles' || $action === 'cycles/lock' || $action === 'paysli
     }
 }
 
+elseif ($action === 'ca-partner') {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        try {
+            $stmt = $db->prepare("
+                SELECT u.id, u.name, u.email, u.status, cp.*
+                FROM users u
+                JOIN company_assignments ca ON u.id = ca.user_id
+                LEFT JOIN ca_profiles cp ON u.id = cp.user_id
+                WHERE ca.company_id = ? AND u.role = 'finance'
+            ");
+            $stmt->execute([$company_id]);
+            hrResponse(200, ['ca_partners' => $stmt->fetchAll()]);
+        } catch (Exception $e) {
+            hrResponse(500, ['error' => 'Failed to fetch CA partners', 'details' => $e->getMessage()]);
+        }
+    }
+    elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $email = $input['email'] ?? '';
+        $password = $input['password'] ?? '';
+        $name = $input['name'] ?? '';
+        
+        $firm_name = $input['firm_name'] ?? '';
+        $registration_number = $input['registration_number'] ?? '';
+        $gst_number = $input['gst_number'] ?? '';
+        $pan_number = $input['pan_number'] ?? '';
+        $mobile_number = $input['mobile_number'] ?? '';
+        $address = $input['address'] ?? '';
+        
+        $bank_name = $input['bank_name'] ?? '';
+        $account_number = $input['account_number'] ?? '';
+        $ifsc_code = $input['ifsc_code'] ?? '';
+        $upi_id = $input['upi_id'] ?? '';
+        $digital_signature = $input['digital_signature'] ?? '';
+
+        if (empty($email) || empty($password) || empty($name)) {
+            hrResponse(400, ['error' => 'Email, Password, and Name are required']);
+        }
+
+        try {
+            $db->beginTransaction();
+
+            // Check if email already exists
+            $check = $db->prepare("SELECT id FROM users WHERE email = ?");
+            $check->execute([$email]);
+            if ($check->fetch()) {
+                hrResponse(400, ['error' => 'A user with this email address already exists']);
+            }
+
+            // Create user
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $db->prepare("INSERT INTO users (email, password_hash, role, name, status) VALUES (?, ?, 'finance', ?, 'Active')");
+            $stmt->execute([$email, $hash, $name]);
+            $newUserId = $db->lastInsertId();
+
+            // Create CA Profile
+            $stmt = $db->prepare("
+                INSERT INTO ca_profiles (
+                    user_id, firm_name, registration_number, gst_number, pan_number, 
+                    mobile_number, address, bank_name, account_number, ifsc_code, upi_id, digital_signature
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $newUserId, $firm_name, $registration_number, $gst_number, $pan_number,
+                $mobile_number, $address, $bank_name, $account_number, $ifsc_code, $upi_id, $digital_signature
+            ]);
+
+            // Assign CA to Company
+            $stmt = $db->prepare("INSERT INTO company_assignments (company_id, user_id, assigned_by, status) VALUES (?, ?, ?, 'Active')");
+            $stmt->execute([$company_id, $newUserId, $user['id']]);
+
+            $db->commit();
+            hrResponse(201, ['message' => 'CA/Finance Partner profile created and assigned successfully']);
+        } catch (Exception $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            hrResponse(500, ['error' => 'Failed to create CA partner', 'details' => $e->getMessage()]);
+        }
+    }
+}
+
 else {
     hrResponse(404, ['error' => 'HR endpoint not found']);
 }

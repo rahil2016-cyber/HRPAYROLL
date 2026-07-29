@@ -481,6 +481,9 @@ elseif ($action === 'invoices') {
             $params = [$user['id']];
 
             if ($filter_company) {
+                if ($user['role'] === 'finance' && !in_array((int)$filter_company, $assignedCompanyIds)) {
+                    finResponse(403, ['error' => 'Forbidden: You do not have access to this company.']);
+                }
                 $query .= " AND i.company_id = ?";
                 $params[] = $filter_company;
             }
