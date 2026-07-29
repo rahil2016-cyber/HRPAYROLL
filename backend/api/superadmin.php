@@ -695,6 +695,41 @@ elseif ($action === 'demo-requests') {
     }
 }
 
+elseif ($action === 'plans') {
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        try {
+            $plans = $db->query("SELECT * FROM plans ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
+            jsonResponse(200, ['plans' => $plans]);
+        } catch (Exception $e) {
+            jsonResponse(500, ['error' => 'Failed to load plans', 'details' => $e->getMessage()]);
+        }
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = $input['id'] ?? null;
+        $price = $input['price'] ?? null;
+        $max_employees = $input['max_employees'] ?? null;
+        $features = $input['features'] ?? null;
+
+        if (!$id || $price === null || $max_employees === null) {
+            jsonResponse(400, ['error' => 'Plan ID, Price, and Max Employees are required']);
+        }
+
+        try {
+            if ($features !== null) {
+                $stmt = $db->prepare("UPDATE plans SET price = ?, max_employees = ?, features = ? WHERE id = ?");
+                $stmt->execute([$price, $max_employees, $features, $id]);
+            } else {
+                $stmt = $db->prepare("UPDATE plans SET price = ?, max_employees = ? WHERE id = ?");
+                $stmt->execute([$price, $max_employees, $id]);
+            }
+            jsonResponse(200, ['message' => 'Subscription plan updated successfully']);
+        } catch (Exception $e) {
+            jsonResponse(500, ['error' => 'Failed to update plan', 'details' => $e->getMessage()]);
+        }
+    } else {
+        jsonResponse(405, ['error' => 'Method not allowed']);
+    }
+}
+
 else {
     jsonResponse(404, ['error' => 'Superadmin endpoint not found']);
 }

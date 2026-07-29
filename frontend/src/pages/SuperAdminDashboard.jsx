@@ -63,6 +63,8 @@ export default function SuperAdminDashboard({ token }) {
   const [activeAssignCompany, setActiveAssignCompany] = useState(null);
   const [selectedCaId, setSelectedCaId] = useState('');
   const [activeEditSubscriptionCompany, setActiveEditSubscriptionCompany] = useState(null);
+  const [plans, setPlans] = useState([]);
+  const [activeEditPlan, setActiveEditPlan] = useState(null);
 
   // New Company & HR creation states
   const [newCompanyForm, setNewCompanyForm] = useState({
@@ -145,6 +147,12 @@ export default function SuperAdminDashboard({ token }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDemoRequests(demoRes.data.requests);
+
+      // 7. Fetch Subscription Plans
+      const plansRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/superadmin/plans', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPlans(plansRes.data.plans);
 
     } catch (err) {
       console.error("Error loading superadmin dashboard data", err);
@@ -326,6 +334,24 @@ export default function SuperAdminDashboard({ token }) {
       fetchDashboardData();
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to update subscription details');
+    }
+  };
+
+  const handleSavePlanDetails = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(window.API_BASE_URL + '/index.php?route=/api/superadmin/plans', {
+        id: activeEditPlan.id,
+        price: parseFloat(activeEditPlan.price),
+        max_employees: parseInt(activeEditPlan.max_employees),
+        features: activeEditPlan.features
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setActiveEditPlan(null);
+      fetchDashboardData();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to update subscription tier details');
     }
   };
 
@@ -736,46 +762,70 @@ export default function SuperAdminDashboard({ token }) {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            <div className="premium-card" style={{ borderTop: '4px solid #94a3b8', position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.25rem 0.5rem', borderRadius: '4px', backgroundColor: '#e2e8f0', color: '#475569', fontSize: '0.7rem', fontWeight: 700 }}>ACTIVE</span>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>Standard Trial</h4>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1.25rem' }}>For small companies starting out</p>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>₹0 <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#64748b' }}>/ month</span></div>
-              <ul style={{ fontSize: '0.8rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', padding: 0 }}>
-                <li>✓ Max Employees: <strong>10</strong></li>
-                <li>✓ Basic employee dashboard</li>
-                <li>✓ Dynamic clock-in</li>
-                <li>✓ Simple payroll features</li>
-              </ul>
-            </div>
-
-            <div className="premium-card" style={{ borderTop: '4px solid #0047B8', position: 'relative', boxShadow: '0 10px 15px -3px rgba(0, 71, 184, 0.08)' }}>
-              <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.25rem 0.5rem', borderRadius: '4px', backgroundColor: '#dbeafe', color: '#0047B8', fontSize: '0.7rem', fontWeight: 700 }}>MOST POPULAR</span>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>Premium Growth</h4>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1.25rem' }}>For mid-sized growing companies</p>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>₹149 <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#64748b' }}>/ month</span></div>
-              <ul style={{ fontSize: '0.8rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', padding: 0 }}>
-                <li>✓ Max Employees: <strong>100</strong></li>
-                <li>✓ Geofencing check-in</li>
-                <li>✓ Indian Standard compliant payroll</li>
-                <li>✓ Leave management workflows</li>
-                <li>✓ Asset registry integration</li>
-              </ul>
-            </div>
-
-            <div className="premium-card" style={{ borderTop: '4px solid #E30613', position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.25rem 0.5rem', borderRadius: '4px', backgroundColor: '#fee2e2', color: '#E30613', fontSize: '0.7rem', fontWeight: 700 }}>CUSTOM</span>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>Enterprise Suite</h4>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1.25rem' }}>For large enterprise organizations</p>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>₹499 <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#64748b' }}>/ month</span></div>
-              <ul style={{ fontSize: '0.8rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', padding: 0 }}>
-                <li>✓ Max Employees: <strong>Unlimited</strong></li>
-                <li>✓ Custom geofence verification</li>
-                <li>✓ Unlimited document storage</li>
-                <li>✓ Premium analytics board</li>
-                <li>✓ Dedicated SLA support</li>
-              </ul>
-            </div>
+            {plans.map((plan) => (
+              <div 
+                key={plan.id} 
+                className="premium-card" 
+                style={{ 
+                  borderTop: `4px solid ${
+                    plan.name === 'Enterprise Suite' ? '#E30613' : 
+                    plan.name === 'Premium Growth' ? '#0047B8' : '#94a3b8'
+                  }`, 
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <div>
+                  <span style={{ 
+                    position: 'absolute', 
+                    top: '1rem', 
+                    right: '1rem', 
+                    padding: '0.25rem 0.5rem', 
+                    borderRadius: '4px', 
+                    backgroundColor: plan.name === 'Premium Growth' ? '#dbeafe' : '#e2e8f0', 
+                    color: plan.name === 'Premium Growth' ? '#0047B8' : '#475569', 
+                    fontSize: '0.7rem', 
+                    fontWeight: 700 
+                  }}>
+                    {plan.name === 'Premium Growth' ? 'MOST POPULAR' : plan.name === 'Enterprise Suite' ? 'CUSTOM' : 'ACTIVE'}
+                  </span>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>{plan.name}</h4>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1.25rem' }}>
+                    {plan.name === 'Standard Trial' && 'For small companies starting out'}
+                    {plan.name === 'Premium Growth' && 'For mid-sized growing companies'}
+                    {plan.name === 'Enterprise Suite' && 'For large enterprise organizations'}
+                  </p>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginBottom: '1rem' }}>
+                    ₹{plan.price} <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#64748b' }}>/ month</span>
+                  </div>
+                  <ul style={{ fontSize: '0.8rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', padding: 0, marginBottom: '1.5rem' }}>
+                    <li>✓ Max Employees: <strong>{plan.max_employees === 9999 ? 'Unlimited' : plan.max_employees}</strong></li>
+                    {(plan.features || '').split(',').map((feat, idx) => (
+                      <li key={idx}>✓ {feat.trim()}</li>
+                    ))}
+                  </ul>
+                </div>
+                <button
+                  onClick={() => setActiveEditPlan(plan)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem',
+                    backgroundColor: 'rgba(0, 71, 184, 0.08)',
+                    color: '#0047B8',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  Edit Pricing & Limits
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -1272,6 +1322,61 @@ export default function SuperAdminDashboard({ token }) {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                 <button type="button" onClick={() => setActiveEditSubscriptionCompany(null)} style={{ padding: '0.55rem 1rem', backgroundColor: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
+                <button type="submit" style={{ padding: '0.55rem 1rem', backgroundColor: '#0047B8', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Plan Details Modal */}
+      {activeEditPlan && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="premium-card" style={{ width: '100%', maxWidth: '450px', backgroundColor: '#fff', borderRadius: '12px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', color: '#0f172a' }}>Edit Plan details: {activeEditPlan.name}</h3>
+            <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1.25rem' }}>
+              Modify the subscription price, maximum employee limit, and feature flags for this service tier.
+            </p>
+            <form onSubmit={handleSavePlanDetails}>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Monthly Price (₹)</label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  step="0.01"
+                  value={activeEditPlan.price}
+                  onChange={e => setActiveEditPlan({ ...activeEditPlan, price: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Max Employees Limit</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  value={activeEditPlan.max_employees}
+                  onChange={e => setActiveEditPlan({ ...activeEditPlan, max_employees: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff' }}
+                />
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Enter 9999 for Unlimited employees.</span>
+              </div>
+
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Features List (Comma-separated)</label>
+                <textarea
+                  rows="3"
+                  value={activeEditPlan.features || ''}
+                  onChange={e => setActiveEditPlan({ ...activeEditPlan, features: e.target.value })}
+                  placeholder="e.g. Basic employee dashboard, clock-in, simple payroll"
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#fff', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <button type="button" onClick={() => setActiveEditPlan(null)} style={{ padding: '0.55rem 1rem', backgroundColor: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
                 <button type="submit" style={{ padding: '0.55rem 1rem', backgroundColor: '#0047B8', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>Save Changes</button>
               </div>
             </form>
