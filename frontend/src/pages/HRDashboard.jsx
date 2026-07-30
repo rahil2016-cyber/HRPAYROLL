@@ -5,7 +5,7 @@ import StatCard from '../components/StatCard';
 import LeafletMap from '../components/LeafletMap';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { MdPeople, MdCheckCircle, MdEvent, MdBlock, MdAdd, MdSettings, MdMyLocation, MdCameraAlt, MdDevices, MdInfo, MdTrendingUp, MdOutlineNetworkCell } from 'react-icons/md';
+import { MdPeople, MdCheckCircle, MdEvent, MdBlock, MdAdd, MdSettings, MdMyLocation, MdCameraAlt, MdDevices, MdInfo, MdTrendingUp, MdOutlineNetworkCell, MdBusiness } from 'react-icons/md';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
