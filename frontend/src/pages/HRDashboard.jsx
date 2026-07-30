@@ -2860,37 +2860,7 @@ export default function HRDashboard({ token }) {
       )}
 
       {/* SUB-TAB: PAYROLL & INVOICING */}
-      {activeSubTab === 'payroll-billing' && serviceType === 'CompletePayroll' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div className="premium-card" style={{ borderLeft: '4px solid #E30613', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>CA Managed Complete Payroll Model</h3>
-            <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: '1.6', margin: 0 }}>
-              Your company subscription has been provisioned under the <strong>Complete Payroll Service</strong> model. 
-              Under this subscription, all professional CA services, ledger entries, tax invoice generation, and monthly payroll processing cycles are managed externally by your assigned Chartered Accountant.
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-              <div style={{ flex: 1, minWidth: '240px', backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#0047B8', fontWeight: 700 }}>HR Permissions (Read-Only)</h4>
-                <ul style={{ paddingLeft: '1.25rem', fontSize: '0.8rem', color: '#64748b', lineHeight: '1.6', margin: 0 }}>
-                  <li>You can view all current active employee registers and records.</li>
-                  <li>Salary structure details for staff can be configured on onboarding.</li>
-                  <li>Daily attendance logs, check-ins, and leaves are fully manageable by HR.</li>
-                  <li>Payroll runs and TAX INVOICE drafts must be generated and locked by the assigned CA.</li>
-                </ul>
-              </div>
-              <div style={{ flex: 1, minWidth: '240px', backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#0047B8', fontWeight: 700 }}>Need Changes?</h4>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: '1.6', margin: 0 }}>
-                  If you need to make adjustments to a drafted or locked invoice, or if a payroll cycle requires manual corrections, please reach out to your assigned CA firm administrator. 
-                  Only the super admin can adjust your subscription service model parameters.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeSubTab === 'payroll-billing' && serviceType === 'PlatformServices' && (
+      {activeSubTab === 'payroll-billing' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
           {/* RUN PAYROLL CYCLE FORM CARD */}
