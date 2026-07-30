@@ -803,9 +803,43 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
                     <option value="5.5">5.5 Days (Alternate Saturdays)</option>
                   </select>
                 </div>
-                <div>
+                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Weekly Off Days</label>
-                  <input type="text" value={formData.weekly_off} onChange={e => handleInputChange('weekly_off', e.target.value)} placeholder="Saturday, Sunday" style={{ width: '100%', padding: '0.55rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.25rem' }}>
+                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => {
+                      const selectedDays = formData.weekly_off ? formData.weekly_off.split(',').map(d => d.trim()) : [];
+                      const isSelected = selectedDays.includes(day);
+                      return (
+                        <button
+                          type="button"
+                          key={day}
+                          onClick={() => {
+                            let updated;
+                            if (isSelected) {
+                              updated = selectedDays.filter(d => d !== day);
+                            } else {
+                              updated = [...selectedDays, day];
+                            }
+                            const orderedUpdated = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].filter(d => updated.includes(d));
+                            handleInputChange('weekly_off', orderedUpdated.join(', '));
+                          }}
+                          style={{
+                            padding: '0.45rem 0.85rem',
+                            borderRadius: '20px',
+                            border: isSelected ? '1.5px solid #0047B8' : '1px solid #cbd5e1',
+                            backgroundColor: isSelected ? 'rgba(0, 71, 184, 0.08)' : '#fff',
+                            color: isSelected ? '#0047B8' : '#475569',
+                            fontWeight: isSelected ? '600' : '400',
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem', color: '#475569' }}>Standard Working Hours / Day</label>
@@ -820,6 +854,11 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
                     <option value="Manual">Manual Approvals</option>
                     <option value="QR">QR Code Scan</option>
                   </select>
+                  {formData.attendance_method === 'Biometric' && (
+                    <div style={{ marginTop: '0.75rem', padding: '0.75rem 1rem', backgroundColor: 'rgba(0, 71, 184, 0.05)', border: '1px solid rgba(0, 71, 184, 0.1)', borderRadius: '6px', fontSize: '0.8rem', color: '#0047B8', lineHeight: '1.4' }}>
+                      <strong>🔌 Biometric Machine Connected:</strong> Once onboarding is complete, you can generate API Keys, connect ZKTeco, eSSL, Matrix, or Mantra machines, and configure sync settings in your HR Dashboard Settings.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

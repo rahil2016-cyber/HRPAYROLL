@@ -54,6 +54,8 @@ try {
 // Routing Logic
 if (strpos($route, '/api/auth') === 0) {
     require_once __DIR__ . '/api/auth.php';
+} elseif (strpos($route, '/api/biometric') === 0) {
+    require_once __DIR__ . '/api/biometric.php';
 } elseif (strpos($route, '/api/superadmin') === 0) {
     if (!$user || $user['role'] !== 'superadmin') {
         http_response_code(403);

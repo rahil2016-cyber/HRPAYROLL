@@ -1438,6 +1438,62 @@ elseif ($action === 'ca-partner') {
     }
 }
 
+elseif ($action === 'biometric/key') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        hrResponse(405, ['error' => 'Method not allowed']);
+    }
+    try {
+        $stmt = $db->prepare("SELECT api_key, status, created_at FROM api_keys WHERE company_id = ? AND status = 'Active' LIMIT 1");
+        $stmt->execute([$company_id]);
+        $keyData = $stmt->fetch();
+        
+        if (!$keyData) {
+            $newKey = bin2hex(random_bytes(16));
+            $stmt = $db->prepare("INSERT INTO api_keys (company_id, api_key, name, status) VALUES (?, ?, 'Default Biometric Key', 'Active')");
+            $stmt->execute([$company_id, $newKey]);
+            
+            $keyData = [
+                'api_key' => $newKey,
+                'status' => 'Active',
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+        }
+        
+        hrResponse(200, $keyData);
+    } catch (Exception $e) {
+        hrResponse(500, ['error' => 'Failed to retrieve/generate biometric API key', 'details' => $e->getMessage()]);
+    }
+}
+
+elseif ($action === 'biometric/key/regenerate') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        hrResponse(405, ['error' => 'Method not allowed']);
+    }
+    try {
+        $db->beginTransaction();
+        
+        $stmt = $db->prepare("UPDATE api_keys SET status = 'Inactive' WHERE company_id = ?");
+        $stmt->execute([$company_id]);
+        
+        $newKey = bin2hex(random_bytes(16));
+        $stmt = $db->prepare("INSERT INTO api_keys (company_id, api_key, name, status) VALUES (?, ?, 'Regenerated Biometric Key', 'Active')");
+        $stmt->execute([$company_id, $newKey]);
+        
+        $db->commit();
+        
+        hrResponse(200, [
+            'api_key' => $newKey,
+            'status' => 'Active',
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+    } catch (Exception $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        hrResponse(500, ['error' => 'Failed to regenerate biometric API key', 'details' => $e->getMessage()]);
+    }
+}
+
 else {
     hrResponse(404, ['error' => 'HR endpoint not found']);
 }
