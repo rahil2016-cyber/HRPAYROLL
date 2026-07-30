@@ -192,63 +192,57 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
     saveDraft(updated);
   };
 
-  const handleSearchAddress = async (idx) => {
-    const loc = formData.locations[idx];
-    if (!loc.address || !loc.address.trim()) {
-      alert("Please enter address details before searching.");
+  const handleDetectLocation = (idx) => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
       return;
     }
-    try {
-      const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(loc.address)}&countrycodes=in`);
-      if (response.data && response.data.length > 0) {
-        const result = response.data[0];
-        const updated = [...formData.locations];
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        
+        let updated = [...formData.locations];
         updated[idx] = {
           ...updated[idx],
-          latitude: parseFloat(result.lat),
-          longitude: parseFloat(result.lon),
-          address: result.display_name
+          latitude: lat,
+          longitude: lon,
+          address: "Detecting address..."
         };
-        const newFormData = { ...formData, locations: updated };
-        setFormData(newFormData);
-        saveDraft(newFormData);
-      } else {
-        alert("Location not found in India. Please try a more general search term.");
-      }
-    } catch (err) {
-      alert("Error searching location. Please manually enter latitude and longitude.");
-    }
-  };
-
-  const handleAddressInputChange = async (idx, value) => {
-    handleNestedChange('locations', idx, 'address', value);
-    if (!value || value.trim().length <= 2) {
-      setAddressSuggestions(prev => ({ ...prev, [idx]: [] }));
-      return;
-    }
-    try {
-      const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&countrycodes=in&limit=5`);
-      setAddressSuggestions(prev => ({
-        ...prev,
-        [idx]: res.data || []
-      }));
-    } catch (err) {
-      console.error("Error fetching address suggestions", err);
-    }
-  };
-
-  const selectAddressSuggestion = (idx, suggestion) => {
-    const updated = [...formData.locations];
-    updated[idx] = {
-      ...updated[idx],
-      address: suggestion.display_name,
-      latitude: parseFloat(suggestion.lat),
-      longitude: parseFloat(suggestion.lon)
-    };
-    const newFormData = { ...formData, locations: updated };
-    setFormData(newFormData);
-    saveDraft(newFormData);
-    setAddressSuggestions(prev => ({ ...prev, [idx]: [] }));
+        setFormData({ ...formData, locations: updated });
+        
+        try {
+          const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+          if (response.data) {
+            updated = [...formData.locations];
+            updated[idx] = {
+              ...updated[idx],
+              latitude: lat,
+              longitude: lon,
+              address: response.data.display_name
+            };
+            const newFormData = { ...formData, locations: updated };
+            setFormData(newFormData);
+            saveDraft(newFormData);
+          }
+        } catch (err) {
+          updated = [...formData.locations];
+          updated[idx] = {
+            ...updated[idx],
+            latitude: lat,
+            longitude: lon,
+            address: `Detected Location (${lat.toFixed(4)}, ${lon.toFixed(4)})`
+          };
+          const newFormData = { ...formData, locations: updated };
+          setFormData(newFormData);
+          saveDraft(newFormData);
+        }
+      },
+      (error) => {
+        alert("Unable to retrieve your location. Please check your browser permissions.");
+      },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
   };
 
   // Base64 file uploader
@@ -1168,35 +1162,17 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
                           <input type="text" required value={loc.name} onChange={e => handleNestedChange('locations', idx, 'name', e.target.value)} placeholder="e.g. Mumbai HQ" style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box' }} />
                         </div>
                         <div>
-                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Search Address Location</label>
-                          <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
-                            <div style={{ flex: 1, position: 'relative' }}>
-                              <input 
-                                type="text" 
-                                value={loc.address} 
-                                onChange={e => handleAddressInputChange(idx, e.target.value)} 
-                                placeholder="Type address (e.g. MG Road, Bengaluru)..." 
-                                style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box' }} 
-                              />
-                              {addressSuggestions[idx] && addressSuggestions[idx].length > 0 && (
-                                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '4px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 100, maxHeight: '180px', overflowY: 'auto', marginTop: '2px' }}>
-                                  {addressSuggestions[idx].map((suggestion, sIdx) => (
-                                    <div 
-                                      key={sIdx} 
-                                      onClick={() => selectAddressSuggestion(idx, suggestion)}
-                                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem', color: '#334155', cursor: 'pointer', borderBottom: '1px solid #f1f5f9', transition: 'background-color 0.2s' }}
-                                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                                      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
-                                    >
-                                      📍 {suggestion.display_name}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
+                          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Office Address Location</label>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <input 
+                              type="text" 
+                              readOnly
+                              value={loc.address || 'Click "Detect Live Location" to set...'} 
+                              style={{ flex: 1, padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box', backgroundColor: '#f1f5f9', color: '#475569' }} 
+                            />
                             <button
                               type="button"
-                              onClick={() => handleSearchAddress(idx)}
+                              onClick={() => handleDetectLocation(idx)}
                               style={{
                                 padding: '0.45rem 1rem',
                                 border: 'none',
@@ -1205,10 +1181,14 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
                                 color: '#fff',
                                 fontSize: '0.75rem',
                                 fontWeight: 700,
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                whiteSpace: 'nowrap'
                               }}
                             >
-                              Search
+                              📍 Detect Live Location
                             </button>
                           </div>
                         </div>
