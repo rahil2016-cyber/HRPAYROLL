@@ -284,8 +284,8 @@ export default function HRDashboard({ token }) {
     hra_type: 'percent', // percent or fixed
     hra_value: 40, // 40% of basic
     hra: 70000,
-    conveyance_allowance: 19200, // standard annual (1600/month)
-    medical_allowance: 15000, // standard annual (1250/month)
+    conveyance_allowance: 0,
+    medical_allowance: 0,
     employer_pf_type: 'percent', // percent or fixed or none
     employer_pf_value: 12, // 12% of basic
     employer_pf: 21000,
