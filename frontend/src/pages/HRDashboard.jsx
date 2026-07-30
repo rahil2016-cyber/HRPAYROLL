@@ -91,6 +91,7 @@ export default function HRDashboard({ token }) {
   };
   const [metrics, setMetrics] = useState({ total_employees: 0, present_today: 0, absent_today: 0, pending_leaves: 0 });
   const [recentAttendance, setRecentAttendance] = useState([]);
+  const [todaysBirthdays, setTodaysBirthdays] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [leaves, setLeaves] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -483,6 +484,7 @@ export default function HRDashboard({ token }) {
       });
       setMetrics(dashRes.data.metrics);
       setRecentAttendance(dashRes.data.recent_attendance);
+      setTodaysBirthdays(dashRes.data.todays_birthdays || []);
       
       const sType = dashRes.data.service_type || 'CompletePayroll';
       setServiceType(sType);
@@ -1081,6 +1083,26 @@ export default function HRDashboard({ token }) {
       {/* SUB-TAB 1: COMPANY OVERVIEW */}
       {activeSubTab === 'overview' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {todaysBirthdays.length > 0 && (
+            <div style={{
+              background: 'linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%)',
+              border: '1px solid #fde68a',
+              borderRadius: '12px',
+              padding: '1rem 1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              boxShadow: 'var(--shadow-sm)'
+            }}>
+              <span style={{ fontSize: '2rem' }}>🎉</span>
+              <div>
+                <strong style={{ color: '#92400e', fontSize: '0.95rem', display: 'block' }}>Today's Birthday Celebrations! 🎂</strong>
+                <span style={{ color: '#b45309', fontSize: '0.85rem' }}>
+                  The following employees are celebrating their birthdays today: {todaysBirthdays.map(b => `${b.employee_name} (${b.employee_code})`).join(', ')}. Wish them a fantastic day! 🎈
+                </span>
+              </div>
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
             <StatCard title="Active Employees" value={metrics.total_employees} icon={MdPeople} description="Registered in catalog" />
             <span style={{ display: 'none' }}>Spacer</span>

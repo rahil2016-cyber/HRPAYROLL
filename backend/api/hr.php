@@ -89,6 +89,20 @@ if ($action === 'dashboard') {
         $serviceTypeStmt->execute([$company_id]);
         $service_type = $serviceTypeStmt->fetchColumn() ?: 'CompletePayroll';
 
+        $todayMonthDay = date('m-d');
+        $bdayStmt = $db->prepare("
+            SELECT e.employee_code, u.name as employee_name, e.date_of_birth
+            FROM employees e
+            JOIN users u ON e.user_id = u.id
+            WHERE e.company_id = ? 
+              AND u.role != 'hr'
+              AND e.date_of_birth IS NOT NULL 
+              AND e.date_of_birth != ''
+              AND strftime('%m-%d', e.date_of_birth) = ?
+        ");
+        $bdayStmt->execute([$company_id, $todayMonthDay]);
+        $todaysBirthdays = $bdayStmt->fetchAll(PDO::FETCH_ASSOC);
+
         hrResponse(200, [
             'metrics' => [
                 'total_employees' => (int)$totalEmployees,
@@ -97,7 +111,8 @@ if ($action === 'dashboard') {
                 'pending_leaves' => (int)$pendingLeaves
             ],
             'recent_attendance' => $recentAttendance,
-            'service_type' => $service_type
+            'service_type' => $service_type,
+            'todays_birthdays' => $todaysBirthdays
         ]);
     } catch (Exception $e) {
         hrResponse(500, ['error' => 'Failed to load dashboard metrics', 'details' => $e->getMessage()]);
@@ -113,7 +128,7 @@ elseif ($action === 'employees') {
                               LEFT JOIN departments d ON e.department_id = d.id
                               LEFT JOIN designations ds ON e.designation_id = ds.id
                               LEFT JOIN branches b ON e.branch_id = b.id
-                              WHERE e.company_id = ? ORDER BY e.id DESC");
+                              WHERE e.company_id = ? AND u.role != 'hr' ORDER BY e.id DESC");
         $stmt->execute([$company_id]);
         $employees = $stmt->fetchAll();
         hrResponse(200, ['employees' => $employees]);
@@ -287,8 +302,8 @@ elseif ($action === 'employees') {
                 $msg .= "You can log in to your Employee Workspace now.\n\n";
                 $msg .= "Best regards,\nHR Allocate Team";
 
-                $headers = "From: hr-allocate@yourdomain.com\r\n";
-                $headers .= "Reply-To: hr-allocate@yourdomain.com\r\n";
+                $headers = "From: notifications@hrallocate.in\r\n";
+                $headers .= "Reply-To: notifications@hrallocate.in\r\n";
                 $headers .= "X-Mailer: PHP/" . phpversion();
 
                 @mail($email, $subject, $msg, $headers);
