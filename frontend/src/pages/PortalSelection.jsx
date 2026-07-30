@@ -1247,7 +1247,7 @@ export default function PortalSelection() {
                 </p>
               </div>
 
-              {/* Simulated Video Player Screen Container */}
+              {/* HTML5 Video Player Screen Container */}
               <div style={{
                 backgroundColor: '#1e293b',
                 borderRadius: '16px',
@@ -1259,54 +1259,23 @@ export default function PortalSelection() {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                {/* Simulated playback screen content */}
-                <div style={{
-                  width: '90%',
-                  height: '80%',
-                  backgroundColor: '#0f172a',
-                  borderRadius: '12px',
-                  border: '1px solid #1e293b',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}>
-                  {/* Top Header */}
-                  <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#131e35' }}>
-                    <div style={{ fontSize: '9px', fontWeight: 700, color: '#fff' }}>HR Allocate Player / Demo Mode</div>
-                    <span style={{ fontSize: '7px', color: '#10b981' }}>● Live Sync</span>
-                  </div>
-
-                  {/* Body Content */}
-                  <div style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', alignItems: 'center' }}>
-                    <div style={{
-                      padding: '1.5rem',
-                      backgroundColor: 'rgba(0, 71, 184, 0.1)',
-                      border: '1px solid #0047B8',
-                      borderRadius: '12px',
-                      textAlign: 'center',
-                      maxWidth: '380px',
-                      animation: 'demoScreenPlay 3s infinite'
-                    }}>
-                      <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>📍</div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', margin: '0 0 0.5rem 0' }}>Step 1: Geofenced Attendance Scanning</h4>
-                      <p style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: '1.5', margin: 0 }}>
-                        Employees clock in using their device GPS coordinates. The system automatically verifies distance bounds against your branch geofences.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Playback Progress Indicator */}
-                  <div style={{ height: '4px', backgroundColor: '#334155', width: '100%' }}>
-                    <div style={{ height: '100%', backgroundColor: '#0047B8', width: '40%', transition: 'width 10s linear' }} />
-                  </div>
-                </div>
+                <video
+                  src="/demo.mp4"
+                  controls
+                  autoPlay
+                  loop
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain'
+                  }}
+                />
               </div>
 
               {/* Bottom Video Action Info */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#94a3b8' }}>
-                <span>Duration: 2:40 Min</span>
-                <span style={{ color: '#10b981', fontWeight: 700 }}>Auto-playing Simulated Demo Walkthrough</span>
+                <span>Playback Controls Enabled</span>
+                <span style={{ color: '#0047B8', fontWeight: 700 }}>HR Allocate Official Walkthrough Video</span>
               </div>
             </div>
           </div>
