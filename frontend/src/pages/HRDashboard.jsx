@@ -113,6 +113,9 @@ export default function HRDashboard({ token }) {
   const [payslipsList, setPayslipsList] = useState([]);
   const [caPartners, setCaPartners] = useState([]);
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().substring(0, 10));
+  const [empPage, setEmpPage] = useState(1);
+  const [attPage, setAttPage] = useState(1);
+  const itemsPerPage = 10;
   
   // Running payroll cycle
   const [runMonth, setRunMonth] = useState(String(new Date().getMonth() + 1));
@@ -1232,6 +1235,9 @@ export default function HRDashboard({ token }) {
         const trendWfhData = attendanceMetrics?.trends?.map(t => t.wfh) || [];
         const trendLateData = attendanceMetrics?.trends?.map(t => t.late) || [];
 
+        const totalAttPages = Math.ceil(hrAttendanceRecords.length / itemsPerPage) || 1;
+        const paginatedAttendance = hrAttendanceRecords.slice((attPage - 1) * itemsPerPage, attPage * itemsPerPage);
+
         const chartData = {
           labels: trendLabels,
           datasets: [
@@ -1357,12 +1363,12 @@ export default function HRDashboard({ token }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {hrAttendanceRecords.length === 0 ? (
+                    {paginatedAttendance.length === 0 ? (
                       <tr>
                         <td colSpan="9" style={{ textAlign: 'center', color: '#64748b' }}>No check-in logs recorded today.</td>
                       </tr>
                     ) : (
-                      hrAttendanceRecords.map((att, idx) => (
+                      paginatedAttendance.map((att, idx) => (
                         <tr key={idx}>
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -1422,14 +1428,64 @@ export default function HRDashboard({ token }) {
                   </tbody>
                 </table>
               </div>
+              
+              {/* Pagination Controls */}
+              {hrAttendanceRecords.length > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', padding: '0 0.5rem' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                    Showing {(attPage - 1) * itemsPerPage + 1} to {Math.min(attPage * itemsPerPage, hrAttendanceRecords.length)} of {hrAttendanceRecords.length} entries
+                  </span>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button
+                      disabled={attPage === 1}
+                      onClick={() => setAttPage(prev => prev - 1)}
+                      style={{
+                        padding: '0.35rem 0.75rem',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '4px',
+                        backgroundColor: attPage === 1 ? '#f1f5f9' : '#fff',
+                        color: attPage === 1 ? '#94a3b8' : '#334155',
+                        cursor: attPage === 1 ? 'not-allowed' : 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      Previous
+                    </button>
+                    <span style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 600 }}>
+                      Page {attPage} of {totalAttPages}
+                    </span>
+                    <button
+                      disabled={attPage === totalAttPages}
+                      onClick={() => setAttPage(prev => prev + 1)}
+                      style={{
+                        padding: '0.35rem 0.75rem',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '4px',
+                        backgroundColor: attPage === totalAttPages ? '#f1f5f9' : '#fff',
+                        color: attPage === totalAttPages ? '#94a3b8' : '#334155',
+                        cursor: attPage === totalAttPages ? 'not-allowed' : 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
       })()}
 
       {/* SUB-TAB 2: EMPLOYEE REGISTRY */}
-      {activeSubTab === 'directory' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      {activeSubTab === 'directory' && (() => {
+        const totalEmpPages = Math.ceil(employees.length / itemsPerPage) || 1;
+        const paginatedEmployees = employees.slice((empPage - 1) * itemsPerPage, empPage * itemsPerPage);
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
           {/* Onboarding Form */}
           <div className="premium-card">
@@ -2586,7 +2642,7 @@ export default function HRDashboard({ token }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {employees.map(emp => (
+                  {paginatedEmployees.map(emp => (
                     <tr key={emp.id}>
                       <td style={{ fontWeight: 700 }}>{emp.employee_code}</td>
                       <td style={{ fontWeight: 600 }}>{emp.name}</td>
@@ -2600,10 +2656,56 @@ export default function HRDashboard({ token }) {
                 </tbody>
               </table>
             </div>
+            
+            {/* Pagination Controls */}
+            {employees.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', padding: '0 0.5rem' }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  Showing {(empPage - 1) * itemsPerPage + 1} to {Math.min(empPage * itemsPerPage, employees.length)} of {employees.length} entries
+                </span>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <button
+                    disabled={empPage === 1}
+                    onClick={() => setEmpPage(prev => prev - 1)}
+                    style={{
+                      padding: '0.35rem 0.75rem',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '4px',
+                      backgroundColor: empPage === 1 ? '#f1f5f9' : '#fff',
+                      color: empPage === 1 ? '#94a3b8' : '#334155',
+                      cursor: empPage === 1 ? 'not-allowed' : 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    Previous
+                  </button>
+                  <span style={{ fontSize: '0.8rem', color: '#334155', fontWeight: 600 }}>
+                    Page {empPage} of {totalEmpPages}
+                  </span>
+                  <button
+                    disabled={empPage === totalEmpPages}
+                    onClick={() => setEmpPage(prev => prev + 1)}
+                    style={{
+                      padding: '0.35rem 0.75rem',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '4px',
+                      backgroundColor: empPage === totalEmpPages ? '#f1f5f9' : '#fff',
+                      color: empPage === totalEmpPages ? '#94a3b8' : '#334155',
+                      cursor: empPage === totalEmpPages ? 'not-allowed' : 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-
         </div>
-      )}
+      );
+    })()}
 
       {/* SUB-TAB 3: LEAVE REQUESTS */}
       {activeSubTab === 'leaves' && (

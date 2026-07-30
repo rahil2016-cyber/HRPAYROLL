@@ -51,6 +51,41 @@ try {
     exit();
 }
 
+// Global IP-Based Rate Limiter (Max 100 requests per minute)
+try {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    $now = time();
+    $window = 60; // 60 seconds
+    
+    // Create rate_limits table if not exists
+    $db->exec("CREATE TABLE IF NOT EXISTS rate_limits (ip TEXT, endpoint TEXT, timestamp INTEGER)");
+    
+    // Clean up expired logs older than 1 minute
+    $delLimiter = $db->prepare("DELETE FROM rate_limits WHERE timestamp < ?");
+    $delLimiter->execute([$now - $window]);
+    
+    // Count requests from this IP in the last minute
+    $countLimiter = $db->prepare("SELECT COUNT(*) FROM rate_limits WHERE ip = ?");
+    $countLimiter->execute([$ip]);
+    $requestCount = $countLimiter->fetchColumn();
+    
+    if ($requestCount > 120) { // Allow up to 120 requests per minute
+        http_response_code(429);
+        header('Retry-After: 60');
+        echo json_encode([
+            'error' => 'Too Many Requests',
+            'message' => 'Rate limit exceeded. Please try again after 60 seconds.'
+        ]);
+        exit();
+    }
+    
+    // Record this request
+    $insLimiter = $db->prepare("INSERT INTO rate_limits (ip, endpoint, timestamp) VALUES (?, ?, ?)");
+    $insLimiter->execute([$ip, $route, $now]);
+} catch (Exception $limiterEx) {
+    // Fail-safe: do not block API calls if SQLite gets locked temporarily
+}
+
 // Routing Logic
 if (strpos($route, '/api/auth') === 0) {
     require_once __DIR__ . '/api/auth.php';
