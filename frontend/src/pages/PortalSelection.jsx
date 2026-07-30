@@ -27,6 +27,7 @@ export default function PortalSelection() {
   // Navigation & Page Section state
   const [activeTab, setActiveTab] = useState('home'); // home, services, about, contact
 
+  const [showVideoModal, setShowVideoModal] = useState(false);
   // Book a Demo Modal state
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [demoForm, setDemoForm] = useState({
@@ -104,26 +105,54 @@ export default function PortalSelection() {
       display: 'flex',
       flexDirection: 'column'
     }}>
+      {/* Inject Keyframe Animations */}
+      <style>{`
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(5deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
+        }
+        @keyframes laptopFloat {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+          100% { transform: translateY(0px); }
+        }
+        @keyframes pulsePlay {
+          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 71, 184, 0.4); }
+          70% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(0, 71, 184, 0); }
+          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 71, 184, 0); }
+        }
+        @keyframes demoScreenPlay {
+          0% { opacity: 0.9; }
+          50% { opacity: 1; }
+          100% { opacity: 0.9; }
+        }
+      `}</style>
+
       {/* Top Banner & Header */}
       <header style={{
-        borderBottom: '1px solid #e2e8f0',
         backgroundColor: '#ffffff',
         position: 'sticky',
         top: 0,
-        zIndex: 100
+        zIndex: 100,
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)'
       }}>
         <div style={{
           maxWidth: '1200px',
           margin: '0 auto',
-          padding: '1rem 1.5rem',
+          padding: '1.25rem 1.5rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
           {/* Logo & Navigation */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-            <Logo width={160} height={40} />
-            <nav style={{ display: 'flex', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontFamily: "'Outfit', sans-serif", fontSize: '1.5rem', fontWeight: 800 }}>
+              <span style={{ color: '#0047B8' }}>HR</span>
+              <span style={{ color: '#0f172a' }}>Allocate</span>
+            </div>
+            
+            <nav style={{ display: 'flex', gap: '2rem' }}>
               {['home', 'why_hrallocate', 'services', 'pricing', 'about', 'contact'].map((tab) => (
                 <button
                   key={tab}
@@ -132,20 +161,31 @@ export default function PortalSelection() {
                     background: 'none',
                     border: 'none',
                     fontSize: '0.95rem',
-                    fontWeight: activeTab === tab ? '700' : '500',
-                    color: activeTab === tab ? '#123328' : '#64748b',
+                    fontWeight: '700',
+                    color: activeTab === tab ? '#0047B8' : '#475569',
                     cursor: 'pointer',
                     textTransform: 'none',
-                    padding: '0.25rem 0',
-                    borderBottom: activeTab === tab ? '2px solid #123328' : '2px solid transparent',
-                    transition: 'all 0.2s ease'
+                    padding: '0.5rem 0',
+                    position: 'relative',
+                    transition: 'color 0.2s ease'
                   }}
                 >
                   {tab === 'why_hrallocate' ? 'Why HRAllocate' : 
                    tab === 'pricing' ? 'Pricing' : 
                    tab === 'about' ? 'About Us' : 
                    tab === 'contact' ? 'Contact' : 
-                   tab}
+                   tab === 'home' ? 'Home' : 'Services'}
+                  {activeTab === tab && (
+                    <span style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: '3px',
+                      backgroundColor: '#0047B8',
+                      borderRadius: '2px'
+                    }} />
+                  )}
                 </button>
               ))}
             </nav>
@@ -156,20 +196,24 @@ export default function PortalSelection() {
             <button
               onClick={() => setShowDemoModal(true)}
               style={{
-                backgroundColor: themeBlue,
+                backgroundColor: '#0047B8',
                 color: '#ffffff',
                 border: 'none',
-                padding: '0.65rem 1.3rem',
+                padding: '0.75rem 1.5rem',
                 borderRadius: '8px',
                 fontSize: '0.9rem',
-                fontWeight: 600,
+                fontWeight: 700,
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
                 transition: 'background-color 0.2s'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#00358a'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = themeBlue}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0047B8'}
             >
-              Book a Demo
+              <span>Book a Demo</span>
+              <MdArrowForward size={16} />
             </button>
           </div>
         </div>
@@ -179,14 +223,12 @@ export default function PortalSelection() {
       <main style={{ flex: 1 }}>
         {activeTab === 'home' && (
           <>
-            {/* Curved Dark Green Hero Section */}
+            {/* Hero Section */}
             <section style={{
-              backgroundColor: '#123328',
-              color: '#ffffff',
-              padding: '4rem 2rem 5rem 2rem',
-              borderRadius: '0 0 40px 40px',
-              position: 'relative',
-              overflow: 'hidden'
+              backgroundImage: 'linear-gradient(135deg, #f0f6ff 0%, #ffffff 100%)',
+              padding: '6rem 1.5rem 4rem 1.5rem',
+              overflow: 'hidden',
+              position: 'relative'
             }}>
               <div style={{
                 maxWidth: '1200px',
@@ -196,68 +238,50 @@ export default function PortalSelection() {
                 gap: '4rem',
                 alignItems: 'center'
               }}>
-                {/* Left Column: Text & CTA */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', zIndex: 5 }}>
-                  <span style={{
-                    color: '#a3e635',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase'
+                {/* Left Column: Text Content */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', zIndex: 10 }}>
+                  <div style={{
+                    alignSelf: 'flex-start',
+                    backgroundColor: '#e6f0ff',
+                    color: '#0047B8',
+                    padding: '0.4rem 1rem',
+                    borderRadius: '30px',
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.05em'
                   }}>
-                    FOR HR LEADERS & FOUNDERS BUILDING GLOBAL TEAMS
-                  </span>
+                    SMART HR. SIMPLE PAYROLL.
+                  </div>
                   
                   <h1 style={{
-                    fontSize: '3.6rem',
-                    fontWeight: 800,
-                    lineHeight: 1.1,
+                    fontSize: '3.8rem',
+                    fontWeight: 900,
+                    lineHeight: 1.15,
                     margin: 0,
+                    color: '#0f172a',
                     letterSpacing: '-0.02em'
                   }}>
-                    All your global employment needs in <span style={{ color: '#a3e635' }}>one place</span>
+                    Everything you need to manage <span style={{ color: '#0047B8' }}>your team</span>
                   </h1>
                   
                   <p style={{
-                    fontSize: '1.1rem',
-                    color: '#9fd3c4',
+                    fontSize: '1.15rem',
+                    color: '#475569',
                     lineHeight: 1.6,
                     margin: 0,
                     maxWidth: '480px'
                   }}>
-                    Build your global team in 180+ countries without opening local offices. Our easy-to-use global HR platform helps you hire remotely, manage payroll, and ensure compliance ethically, with real employment experts by your side.
+                    Hire, pay, and manage employees effortlessly. Automate payroll, ensure compliance, and focus on what matters most.
                   </p>
                   
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     <button
                       onClick={() => setShowDemoModal(true)}
                       style={{
-                        backgroundColor: '#ffffff',
-                        color: '#123328',
-                        border: 'none',
-                        padding: '0.9rem 2rem',
-                        borderRadius: '30px',
-                        fontSize: '1rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                      Book a Demo
-                    </button>
-                    <button
-                      onClick={() => {
-                        const target = document.getElementById('gateways');
-                        if (target) target.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      style={{
-                        backgroundColor: 'transparent',
+                        backgroundColor: '#0047B8',
                         color: '#ffffff',
-                        border: '2px solid #ffffff',
-                        padding: '0.9rem 2rem',
+                        border: 'none',
+                        padding: '0.9rem 2.2rem',
                         borderRadius: '30px',
                         fontSize: '1rem',
                         fontWeight: 700,
@@ -265,146 +289,237 @@ export default function PortalSelection() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        transition: 'background-color 0.2s'
+                        boxShadow: '0 8px 20px rgba(0, 71, 184, 0.25)',
+                        transition: 'transform 0.2s'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                     >
-                      <span>Launch Portals</span>
+                      <span>Book a Demo</span>
                       <MdArrowForward size={18} />
+                    </button>
+                    
+                    <button
+                      onClick={() => setShowVideoModal(true)}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        color: '#0047B8',
+                        border: '1.5px solid #cbd5e1',
+                        padding: '0.85rem 1.8rem',
+                        borderRadius: '30px',
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.02)',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#0047B8';
+                        e.currentTarget.style.backgroundColor = '#f0f6ff';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                      }}
+                    >
+                      <div style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        backgroundColor: '#e6f0ff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        animation: 'pulsePlay 2s infinite'
+                      }}>
+                        <svg width="10" height="10" viewBox="0 0 10 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1.5 1.5L8.5 6L1.5 10.5V1.5Z" fill="#0047B8" stroke="#0047B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <span>See How It Works</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Right Column: Cards Collage */}
+                {/* Right Column: 3D Laptop Mockup & Floating Elements */}
                 <div style={{
                   position: 'relative',
-                  minHeight: '400px',
+                  minHeight: '460px',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
                   zIndex: 5
                 }}>
-                  {/* Card 1: Interactive Salary Insights Tool */}
+                  {/* Floating Glassy Sphere 1 */}
                   <div style={{
-                    backgroundColor: '#ffffff',
-                    color: '#0f172a',
-                    padding: '1.25rem',
-                    borderRadius: '16px',
-                    width: '280px',
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle at 30% 30%, #93c5fd 0%, #3b82f6 70%, #1e3a8a 100%)',
+                    boxShadow: 'inset -2px -2px 8px rgba(0,0,0,0.3), 0 10px 20px rgba(59,130,246,0.3)',
                     position: 'absolute',
-                    top: '10px',
-                    left: '5%',
-                    zIndex: 3
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#123328' }}>Salary Insights Tool</span>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
-                    </div>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                      <div>
-                        <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '0.2rem' }}>Role</label>
-                        <select 
-                          value={insightRole}
-                          onChange={e => setInsightRole(e.target.value)}
-                          style={{ width: '100%', padding: '0.35rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.75rem', backgroundColor: '#f8fafc' }}
-                        >
-                          <option value="Developer">Senior Software Developer</option>
-                          <option value="Designer">UI/UX Designer</option>
-                          <option value="Manager">Product Manager</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '0.2rem' }}>Country</label>
-                        <select
-                          value={insightCountry}
-                          onChange={e => setInsightCountry(e.target.value)}
-                          style={{ width: '100%', padding: '0.35rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.75rem', backgroundColor: '#f8fafc' }}
-                        >
-                          <option value="India">🇮🇳 India</option>
-                          <option value="Spain">🇪🇸 Spain</option>
-                          <option value="USA">🇺🇸 United States</option>
-                        </select>
-                      </div>
-
-                      <div style={{
-                        marginTop: '0.5rem',
-                        padding: '0.75rem',
-                        backgroundColor: '#f0fdf4',
-                        borderRadius: '8px',
-                        border: '1px solid #bbf7d0',
-                        textAlign: 'center'
-                      }}>
-                        <span style={{ fontSize: '0.65rem', color: '#166534', display: 'block', fontWeight: 600 }}>Estimated Gross Pay</span>
-                        <strong style={{ fontSize: '0.9rem', color: '#14532d' }}>
-                          {insightRole === 'Developer' && insightCountry === 'India' && '₹1,850,000 / yr'}
-                          {insightRole === 'Developer' && insightCountry === 'Spain' && '€55,000 / yr'}
-                          {insightRole === 'Developer' && insightCountry === 'USA' && '$135,000 / yr'}
-                          
-                          {insightRole === 'Designer' && insightCountry === 'India' && '₹1,400,000 / yr'}
-                          {insightRole === 'Designer' && insightCountry === 'Spain' && '€45,000 / yr'}
-                          {insightRole === 'Designer' && insightCountry === 'USA' && '$110,000 / yr'}
-                          
-                          {insightRole === 'Manager' && insightCountry === 'India' && '₹2,600,000 / yr'}
-                          {insightRole === 'Manager' && insightCountry === 'Spain' && '€75,000 / yr'}
-                          {insightRole === 'Manager' && insightCountry === 'USA' && '$160,000 / yr'}
-                        </strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card 2: Full-Time Employee (Erick Carvalho) */}
-                  <div style={{
-                    backgroundColor: '#d9f99d',
-                    color: '#1a2e05',
-                    padding: '1.25rem',
-                    borderRadius: '16px',
-                    width: '200px',
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
-                    position: 'absolute',
-                    right: '5%',
-                    top: '40px',
-                    zIndex: 2
-                  }}>
-                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#a3e635', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: '#1a2e05' }}>EC</div>
-                      <div>
-                        <strong style={{ fontSize: '0.85rem', display: 'block' }}>Erick Carvalho</strong>
-                        <span style={{ fontSize: '0.65rem', color: '#4d7c0f', fontWeight: 600 }}>Lead Programmer</span>
-                      </div>
-                    </div>
-                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full-Time Employee</span>
-                      <span style={{ fontSize: '1rem' }}>🇧🇷</span>
-                    </div>
-                  </div>
-
-                  {/* Card 3: Contractor (Angelika Weber) */}
-                  <div style={{
-                    backgroundColor: '#7e22ce',
-                    color: '#ffffff',
-                    padding: '1.25rem',
-                    borderRadius: '16px',
-                    width: '200px',
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
-                    position: 'absolute',
-                    bottom: '10px',
+                    top: '20px',
                     right: '15%',
-                    zIndex: 4
+                    zIndex: 12,
+                    animation: 'float 6s ease-in-out infinite'
+                  }} />
+
+                  {/* Floating Glassy Sphere 2 */}
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle at 30% 30%, #e0f2fe 0%, #60a5fa 70%, #1d4ed8 100%)',
+                    boxShadow: 'inset -1px -1px 4px rgba(0,0,0,0.3), 0 6px 12px rgba(59,130,246,0.2)',
+                    position: 'absolute',
+                    bottom: '120px',
+                    left: '5%',
+                    zIndex: 12,
+                    animation: 'float 8s ease-in-out infinite 1s'
+                  }} />
+
+                  {/* Main Laptop 3D Body Wrapper */}
+                  <div style={{
+                    animation: 'laptopFloat 5s ease-in-out infinite',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    zIndex: 10
                   }}>
-                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#c084fc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: '#7e22ce' }}>AW</div>
-                      <div>
-                        <strong style={{ fontSize: '0.85rem', display: 'block' }}>Angelika Weber</strong>
-                        <span style={{ fontSize: '0.65rem', color: '#e9d5ff' }}>Data Analyst</span>
+                    {/* Screen Bezel / Container */}
+                    <div style={{
+                      width: '440px',
+                      height: '290px',
+                      backgroundColor: '#1e293b',
+                      borderRadius: '16px',
+                      padding: '8px',
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                      border: '2px solid #475569',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
+                      {/* Inner Screen displaying Dashboard */}
+                      <div style={{
+                        flex: 1,
+                        backgroundColor: '#f8fafc',
+                        borderRadius: '10px',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: '9px',
+                        color: '#0f172a'
+                      }}>
+                        {/* Mock Dashboard Sidebar */}
+                        <div style={{
+                          width: '44px',
+                          backgroundColor: '#0047B8',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          padding: '0.75rem 0',
+                          gap: '0.85rem'
+                        }}>
+                          <div style={{ color: '#fff', fontWeight: 800, fontSize: '11px', marginBottom: '0.5rem' }}>HA</div>
+                          {['🏠', '👥', '💰', '📅', '📄', '⚙️'].map((ico, idx) => (
+                            <span key={idx} style={{ color: idx === 0 ? '#ffffff' : 'rgba(255,255,255,0.6)', cursor: 'pointer' }}>{ico}</span>
+                          ))}
+                        </div>
+
+                        {/* Mock Dashboard Main Content */}
+                        <div style={{ flex: 1, padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', overflow: 'hidden' }}>
+                          {/* Top Bar */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <strong style={{ fontSize: '11px', display: 'block' }}>Welcome back, Admin 👋</strong>
+                              <span style={{ fontSize: '7px', color: '#64748b' }}>Here's what's happening today.</span>
+                            </div>
+                            <span style={{ fontSize: '7px', padding: '0.2rem 0.5rem', backgroundColor: '#e2e8f0', borderRadius: '4px', color: '#334155', fontWeight: 600 }}>May 2025</span>
+                          </div>
+
+                          {/* Stat Grid */}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
+                            {[
+                              { label: 'Total Employees', val: '256', col: '#10b981' },
+                              { label: 'Payroll Processed', val: '₹12.5L', col: '#0047B8' },
+                              { label: 'Pending Approvals', val: '18', col: '#ef4444' },
+                              { label: 'Compliance Status', val: '100%', col: '#10b981' }
+                            ].map((st, idx) => (
+                              <div key={idx} style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.4rem', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+                                <span style={{ fontSize: '6px', color: '#64748b', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{st.label}</span>
+                                <strong style={{ fontSize: '10px', color: '#0f172a', display: 'block', marginTop: '0.15rem' }}>{st.val}</strong>
+                                <span style={{ fontSize: '5px', color: st.col, display: 'block', marginTop: '0.15rem' }}>● Active</span>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Chart & Recent Activity split */}
+                          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.5rem', flex: 1, minHeight: 0 }}>
+                            {/* Chart */}
+                            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                              <strong style={{ fontSize: '7px', color: '#334155' }}>Payroll Overview</strong>
+                              <div style={{ flex: 1, position: 'relative', borderLeft: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
+                                {/* simulated line graph */}
+                                <svg width="100%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="none" style={{ position: 'absolute', top: 0, left: 0 }}>
+                                  <path d="M0,35 Q20,25 40,28 T80,10 T100,5" fill="none" stroke="#0047B8" strokeWidth="1.5" />
+                                  <path d="M0,35 Q20,25 40,28 T80,10 T100,5 L100,40 L0,40 Z" fill="rgba(0, 71, 184, 0.05)" />
+                                </svg>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '5px', color: '#94a3b8' }}>
+                                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span>
+                              </div>
+                            </div>
+
+                            {/* Recent Activity */}
+                            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', overflow: 'hidden' }}>
+                              <strong style={{ fontSize: '7px', color: '#334155' }}>Recent Activity</strong>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                {[
+                                  { text: 'Payroll for May 2025', desc: 'Completed', time: '2h ago' },
+                                  { text: 'New Employee Onboarded', desc: 'Active', time: '5h ago' },
+                                  { text: 'Leave Request Approved', desc: 'Success', time: '1d ago' }
+                                ].map((act, i) => (
+                                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.15rem' }}>
+                                    <div>
+                                      <span style={{ fontSize: '6px', fontWeight: 600, display: 'block' }}>{act.text}</span>
+                                      <span style={{ fontSize: '5px', color: '#10b981' }}>{act.desc}</span>
+                                    </div>
+                                    <span style={{ fontSize: '5px', color: '#94a3b8' }}>{act.time}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contractor</span>
-                      <span style={{ fontSize: '1rem' }}>🇩🇪</span>
+
+                    {/* Keyboard Base */}
+                    <div style={{
+                      width: '480px',
+                      height: '14px',
+                      backgroundColor: '#cbd5e1',
+                      borderRadius: '0 0 12px 12px',
+                      borderBottom: '4px solid #94a3b8',
+                      boxShadow: '0 10px 15px rgba(0,0,0,0.1)'
+                    }} />
+
+                    {/* Pedestal Base (below laptop) */}
+                    <div style={{
+                      width: '320px',
+                      height: '24px',
+                      backgroundColor: '#e6f0ff',
+                      borderRadius: '50%',
+                      marginTop: '8px',
+                      border: '3px solid #0047B8',
+                      boxShadow: '0 15px 30px rgba(0, 71, 184, 0.15)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <div style={{ width: '90%', height: '80%', borderRadius: '50%', backgroundColor: '#0047B8', opacity: 0.1 }} />
                     </div>
                   </div>
                 </div>
@@ -421,7 +536,7 @@ export default function PortalSelection() {
               <h2 style={{
                 fontSize: '2.6rem',
                 fontWeight: 800,
-                color: '#123328',
+                color: '#0047B8',
                 lineHeight: 1.2,
                 letterSpacing: '-0.02em',
                 marginBottom: '1rem'
@@ -450,7 +565,7 @@ export default function PortalSelection() {
                 fontWeight: 800,
                 textAlign: 'center',
                 marginBottom: '3rem',
-                color: '#123328',
+                color: '#0047B8',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
               }}>
@@ -474,14 +589,14 @@ export default function PortalSelection() {
                       onMouseLeave={() => setHoveredCard(null)}
                       style={{
                         backgroundColor: '#ffffff',
-                        border: `1px solid ${isHovered ? '#123328' : '#e2e8f0'}`,
+                        border: `1px solid ${isHovered ? '#0047B8' : '#e2e8f0'}`,
                         borderRadius: '24px',
                         padding: '2.5rem 2rem',
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
                         boxShadow: isHovered 
-                          ? '0 20px 25px -5px rgba(18, 51, 40, 0.1), 0 10px 10px -5px rgba(18, 51, 40, 0.04)' 
+                          ? '0 20px 25px -5px rgba(0, 71, 184, 0.1), 0 10px 10px -5px rgba(0, 71, 184, 0.04)' 
                           : '0 4px 6px -1px rgba(0,0,0,0.05)',
                         display: 'flex',
                         flexDirection: 'column',
@@ -495,8 +610,8 @@ export default function PortalSelection() {
                           width: '52px',
                           height: '52px',
                           borderRadius: '14px',
-                          backgroundColor: isHovered ? '#123328' : '#f0fdf4',
-                          color: isHovered ? '#ffffff' : '#123328',
+                          backgroundColor: isHovered ? '#0047B8' : '#e6f0ff',
+                          color: isHovered ? '#ffffff' : '#0047B8',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -511,7 +626,7 @@ export default function PortalSelection() {
                           fontWeight: 800,
                           textTransform: 'uppercase',
                           letterSpacing: '0.08em',
-                          color: '#123328',
+                          color: '#0047B8',
                           display: 'block',
                           marginBottom: '0.35rem',
                           opacity: 0.7
@@ -544,7 +659,7 @@ export default function PortalSelection() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        color: '#123328',
+                        color: '#0047B8',
                         fontWeight: 700,
                         fontSize: '0.9rem'
                       }}>
@@ -1075,6 +1190,128 @@ export default function PortalSelection() {
           </div>
         </div>
       )}
+
+      {/* -------------------- VIDEO DEMO MODAL overlay -------------------- */}
+      {showVideoModal && (() => {
+        return (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            padding: '1.5rem'
+          }}>
+            <div style={{
+              backgroundColor: '#0f172a',
+              color: '#ffffff',
+              borderRadius: '24px',
+              border: '2.5px solid #0047B8',
+              width: '100%',
+              maxWidth: '800px',
+              padding: '2.25rem',
+              position: 'relative',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem'
+            }}>
+              {/* Close Button */}
+              <button
+                onClick={() => setShowVideoModal(false)}
+                style={{
+                  position: 'absolute',
+                  top: '1.25rem',
+                  right: '1.25rem',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#94a3b8',
+                  padding: '0.25rem',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255,255,255,0.05)'
+                }}
+              >
+                <MdClose size={22} />
+              </button>
+
+              <div>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, margin: '0 0 0.25rem 0', color: '#fff' }}>
+                  See How HR Allocate Works 🎬
+                </h3>
+                <p style={{ color: '#94a3b8', fontSize: '0.8rem', margin: 0 }}>
+                  An interactive walkthrough simulating geofenced attendance tracking and complete payroll processing.
+                </p>
+              </div>
+
+              {/* Simulated Video Player Screen Container */}
+              <div style={{
+                backgroundColor: '#1e293b',
+                borderRadius: '16px',
+                height: '380px',
+                position: 'relative',
+                overflow: 'hidden',
+                border: '1px solid #334155',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                {/* Simulated playback screen content */}
+                <div style={{
+                  width: '90%',
+                  height: '80%',
+                  backgroundColor: '#0f172a',
+                  borderRadius: '12px',
+                  border: '1px solid #1e293b',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  {/* Top Header */}
+                  <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#131e35' }}>
+                    <div style={{ fontSize: '9px', fontWeight: 700, color: '#fff' }}>HR Allocate Player / Demo Mode</div>
+                    <span style={{ fontSize: '7px', color: '#10b981' }}>● Live Sync</span>
+                  </div>
+
+                  {/* Body Content */}
+                  <div style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', alignItems: 'center' }}>
+                    <div style={{
+                      padding: '1.5rem',
+                      backgroundColor: 'rgba(0, 71, 184, 0.1)',
+                      border: '1px solid #0047B8',
+                      borderRadius: '12px',
+                      textAlign: 'center',
+                      maxWidth: '380px',
+                      animation: 'demoScreenPlay 3s infinite'
+                    }}>
+                      <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>📍</div>
+                      <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', margin: '0 0 0.5rem 0' }}>Step 1: Geofenced Attendance Scanning</h4>
+                      <p style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: '1.5', margin: 0 }}>
+                        Employees clock in using their device GPS coordinates. The system automatically verifies distance bounds against your branch geofences.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Playback Progress Indicator */}
+                  <div style={{ height: '4px', backgroundColor: '#334155', width: '100%' }}>
+                    <div style={{ height: '100%', backgroundColor: '#0047B8', width: '40%', transition: 'width 10s linear' }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Video Action Info */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#94a3b8' }}>
+                <span>Duration: 2:40 Min</span>
+                <span style={{ color: '#10b981', fontWeight: 700 }}>Auto-playing Simulated Demo Walkthrough</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Footer */}
       <footer style={{
