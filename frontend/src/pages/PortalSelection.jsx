@@ -124,7 +124,7 @@ export default function PortalSelection() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
             <Logo width={160} height={40} />
             <nav style={{ display: 'flex', gap: '1.5rem' }}>
-              {['home', 'services', 'about', 'contact'].map((tab) => (
+              {['home', 'why_hrallocate', 'services', 'pricing', 'about', 'contact'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -133,15 +133,19 @@ export default function PortalSelection() {
                     border: 'none',
                     fontSize: '0.95rem',
                     fontWeight: activeTab === tab ? '700' : '500',
-                    color: activeTab === tab ? themeBlue : '#64748b',
+                    color: activeTab === tab ? '#123328' : '#64748b',
                     cursor: 'pointer',
-                    textTransform: 'capitalize',
+                    textTransform: 'none',
                     padding: '0.25rem 0',
-                    borderBottom: activeTab === tab ? `2px solid ${themeBlue}` : '2px solid transparent',
+                    borderBottom: activeTab === tab ? '2px solid #123328' : '2px solid transparent',
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  {tab === 'about' ? 'About Us' : tab === 'contact' ? 'Contact' : tab}
+                  {tab === 'why_hrallocate' ? 'Why HRAllocate' : 
+                   tab === 'pricing' ? 'Pricing' : 
+                   tab === 'about' ? 'About Us' : 
+                   tab === 'contact' ? 'Contact' : 
+                   tab}
                 </button>
               ))}
             </nav>
@@ -405,31 +409,6 @@ export default function PortalSelection() {
                   </div>
                 </div>
               </div>
-
-              {/* Bottom Logos Bar */}
-              <div style={{
-                marginTop: '4rem',
-                borderTop: '1px solid rgba(255,255,255,0.1)',
-                paddingTop: '2rem',
-                display: 'flex',
-                justifyContent: 'center',
-                flexWrap: 'wrap',
-                gap: '2.5rem',
-                alignItems: 'center',
-                opacity: 0.8
-              }}>
-                {['Brex', 'AUTOMATTIC', 'BADOO', 'MEWS', 'Payhawk', 'CHILI PIPER', 'lokalise', 'Bloom'].map((logo, idx) => (
-                  <span key={idx} style={{
-                    fontSize: '1rem',
-                    fontWeight: 800,
-                    letterSpacing: '0.05em',
-                    color: '#9fd3c4',
-                    fontFamily: "'Outfit', sans-serif"
-                  }}>
-                    {logo}
-                  </span>
-                ))}
-              </div>
             </section>
 
             {/* Middle Section Title */}
@@ -581,6 +560,153 @@ export default function PortalSelection() {
               </div>
             </section>
           </>
+        )}
+
+        {activeTab === 'why_hrallocate' && (
+          <section style={{
+            maxWidth: '1000px',
+            margin: '0 auto',
+            padding: '4rem 1.5rem',
+            lineHeight: '1.7'
+          }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#123328', marginBottom: '1.5rem', textAlign: 'center', letterSpacing: '-0.02em' }}>
+              Why Choose HRAllocate?
+            </h2>
+            <p style={{ color: '#475569', textAlign: 'center', marginBottom: '3.5rem', fontSize: '1.15rem', maxWidth: '700px', margin: '0 auto 4rem auto' }}>
+              We bring enterprise-grade automation to your Indian payroll and compliance management cycle, reducing manual effort to zero.
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '2rem'
+            }}>
+              {[
+                {
+                  title: 'GPS Geofenced Verification',
+                  desc: 'Ensure team presence automatically. Check-ins are strictly restricted to office coordinates or designated site bounds, preventing proxy attendance.'
+                },
+                {
+                  title: 'AI Face & Liveness Detection',
+                  desc: 'Upgrade security using modern liveness scanning. Authenticate check-ins with single-photo facial recognition to eliminate fraud.'
+                },
+                {
+                  title: 'Automated Indian Tax Compliance',
+                  desc: 'State-customized Professional Tax (PT), PF deductions, ESI returns, and TDS brackets are mapped and updated dynamically to local guidelines.'
+                },
+                {
+                  title: 'CA / Finance Partner Portal',
+                  desc: 'Grant secure read/write or edit access to your Chartered Accountant or advisory firm to review books and generate tax invoices easily.'
+                }
+              ].map((item, idx) => (
+                <div key={idx} style={{
+                  padding: '2rem',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '16px',
+                  boxShadow: 'var(--shadow-sm)'
+                }}>
+                  <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#123328', margin: '0 0 0.75rem 0' }}>{item.title}</h4>
+                  <p style={{ fontSize: '0.875rem', color: '#475569', margin: 0 }}>{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'pricing' && (
+          <section style={{
+            maxWidth: '900px',
+            margin: '0 auto',
+            padding: '4rem 1.5rem'
+          }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#123328', marginBottom: '1.5rem', textAlign: 'center', letterSpacing: '-0.02em' }}>
+              Transparent Subscription Pricing
+            </h2>
+            <p style={{ color: '#475569', textAlign: 'center', marginBottom: '4rem', fontSize: '1.15rem' }}>
+              Select the pricing tier that matches your business model. No hidden setup costs.
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: '2.5rem',
+              alignItems: 'stretch'
+            }}>
+              {/* Plan 1 */}
+              <div style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '24px',
+                padding: '2.5rem 2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Self-Managed</span>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0.25rem 0 1rem 0' }}>Platform Services</h3>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '1.5rem' }}>
+                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#123328' }}>₹4,999</span>
+                    <span style={{ fontSize: '#64748b', fontSize: '0.85rem' }}>/ month</span>
+                  </div>
+                  <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: '#475569', lineHeight: '2', marginBottom: '2rem' }}>
+                    <li>Raise unlimited Client Tax Invoices</li>
+                    <li>GPS Geofence + AI Facial Check-in</li>
+                    <li>Self-managed Monthly Salary Cycles</li>
+                    <li>Automated PF / ESI / TDS Calculation</li>
+                    <li>Email & Chat Assistance Support</li>
+                  </ul>
+                </div>
+                <button
+                  onClick={() => setShowDemoModal(true)}
+                  style={{ width: '100%', padding: '0.75rem', border: '2px solid #123328', color: '#123328', backgroundColor: 'transparent', borderRadius: '30px', fontWeight: 700, cursor: 'pointer', transition: 'background-color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0fdf4'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  Start Platform Free Trial
+                </button>
+              </div>
+
+              {/* Plan 2 */}
+              <div style={{
+                backgroundColor: '#123328',
+                color: '#ffffff',
+                border: '1px solid #123328',
+                borderRadius: '24px',
+                padding: '2.5rem 2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '0 20px 25px -5px rgba(18, 51, 40, 0.15)'
+              }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#a3e635', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Assistance</span>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', margin: '0.25rem 0 1rem 0' }}>Complete Payroll Service</h3>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '1.5rem' }}>
+                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#a3e635' }}>₹9,999</span>
+                    <span style={{ color: '#9fd3c4', fontSize: '0.85rem' }}>/ month</span>
+                  </div>
+                  <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: '#9fd3c4', lineHeight: '2', marginBottom: '2rem' }}>
+                    <li>Everything in Platform Services</li>
+                    <li><strong>Assigned Chartered Accountant Firm</strong></li>
+                    <li>Direct TDS Filing & Return Processing</li>
+                    <li>Books Ledger Syncing & Reconciliation</li>
+                    <li>Priority Phone Support SLA (2 Hours)</li>
+                  </ul>
+                </div>
+                <button
+                  onClick={() => setShowDemoModal(true)}
+                  style={{ width: '100%', padding: '0.75rem', border: 'none', color: '#123328', backgroundColor: '#a3e635', borderRadius: '30px', fontWeight: 800, cursor: 'pointer', transition: 'transform 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  Hire CA Partner Model
+                </button>
+              </div>
+            </div>
+          </section>
         )}
 
         {activeTab === 'services' && (
