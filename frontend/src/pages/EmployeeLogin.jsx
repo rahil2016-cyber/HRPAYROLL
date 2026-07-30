@@ -19,7 +19,8 @@ export default function EmployeeLogin({ onLoginSuccess }) {
     try {
       const response = await axios.post(window.API_BASE_URL + '/index.php?route=/api/auth/login', {
         email,
-        password
+        password,
+        role: 'employee'
       });
       if (response.data.token) {
         onLoginSuccess(response.data.token, response.data.user);

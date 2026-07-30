@@ -41,6 +41,11 @@ if ($action === 'login') {
         sendResponse(401, ['error' => 'Invalid credentials']);
     }
 
+    $requiredRole = $input['role'] ?? '';
+    if (!empty($requiredRole) && $userRecord['role'] !== $requiredRole) {
+        sendResponse(403, ['error' => 'Access Denied: Unauthorized portal access']);
+    }
+
     // Get employee details if user is not superadmin
     $employeeRecord = null;
     if ($userRecord['role'] !== 'superadmin') {

@@ -19,7 +19,8 @@ export default function FinanceLogin({ onLoginSuccess }) {
     try {
       const response = await axios.post(window.API_BASE_URL + '/index.php?route=/api/auth/login', {
         email,
-        password
+        password,
+        role: 'finance'
       });
       if (response.data.token) {
         onLoginSuccess(response.data.token, response.data.user);
