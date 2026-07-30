@@ -4,7 +4,8 @@ import Logo from './Logo';
 import { 
   MdDashboard, MdPeople, MdLayers, MdAttachMoney, MdReceipt, 
   MdMenu, MdClose, MdLogout, MdWork, MdDateRange, MdBusiness, 
-  MdSettings, MdCampaign, MdCreditCard, MdConfirmationNumber, MdBugReport
+  MdSettings, MdCampaign, MdCreditCard, MdConfirmationNumber, MdBugReport,
+  MdMyLocation
 } from 'react-icons/md';
 
 export default function Layout({ user, children, onLogout }) {
@@ -31,11 +32,14 @@ export default function Layout({ user, children, onLogout }) {
         ];
       case 'hr':
         return [
-          { label: 'Dashboard', path: '/hr', icon: MdDashboard },
+          { label: 'Company Overview', path: '/hr', icon: MdDashboard },
+          { label: 'Attendance Tracking', path: '/hr/attendance', icon: MdMyLocation },
           { label: 'Employee Registry', path: '/hr/employees', icon: MdPeople },
           { label: 'Leave Applications', path: '/hr/leaves', icon: MdDateRange },
           { label: 'Departments', path: '/hr/departments', icon: MdLayers },
           { label: 'Designations', path: '/hr/designations', icon: MdWork },
+          { label: 'Noticeboard Manager', path: '/hr/noticeboard', icon: MdCampaign },
+          { label: 'Payroll & Invoicing', path: '/hr/payroll', icon: MdAttachMoney },
           { label: 'CA / Finance Partner', path: '/hr/ca-partner', icon: MdBusiness },
           { label: 'Settings', path: '/hr/settings', icon: MdSettings }
         ];

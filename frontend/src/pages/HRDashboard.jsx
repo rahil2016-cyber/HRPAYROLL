@@ -1076,45 +1076,7 @@ export default function HRDashboard({ token }) {
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a' }}>Human Resource Management</h2>
       </div>
 
-      {/* Tabs */}
-      <div style={{
-        display: 'flex',
-        borderBottom: '1px solid #e2e8f0',
-        gap: '1.5rem',
-        overflowX: 'auto',
-        paddingBottom: '0.25rem'
-      }}>
-         {[
-          { id: 'overview', label: 'Company Overview' },
-          { id: 'attendance', label: 'Attendance Tracking' },
-          { id: 'directory', label: 'Employee Registry' },
-          { id: 'leaves', label: 'Leave Requests' },
-          { id: 'structure', label: 'Org Structures' },
-          { id: 'noticeboard', label: 'Noticeboard Manager' },
-          { id: 'payroll-billing', label: 'Payroll & Invoicing' },
-          { id: 'ca-partner', label: 'CA / Finance Partner' },
-          ...(activeSubTab === 'settings' ? [{ id: 'settings', label: 'Settings' }] : [])
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => handleSubTabChange(tab.id)}
-            style={{
-              padding: '0.5rem 0.25rem',
-              border: 'none',
-              borderBottom: activeSubTab === tab.id ? '2px solid #E30613' : '2px solid transparent',
-              backgroundColor: 'transparent',
-              color: activeSubTab === tab.id ? '#0047B8' : '#64748b',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.2s'
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Tabs removed to use sidebar navigation */}
 
       {/* SUB-TAB 1: COMPANY OVERVIEW */}
       {activeSubTab === 'overview' && (
