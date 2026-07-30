@@ -38,6 +38,7 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState({});
 
   // Form states
   const [formData, setFormData] = useState({
@@ -217,6 +218,37 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
     } catch (err) {
       alert("Error searching location. Please manually enter latitude and longitude.");
     }
+  };
+
+  const handleAddressInputChange = async (idx, value) => {
+    handleNestedChange('locations', idx, 'address', value);
+    if (!value || value.trim().length <= 2) {
+      setAddressSuggestions(prev => ({ ...prev, [idx]: [] }));
+      return;
+    }
+    try {
+      const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&limit=5`);
+      setAddressSuggestions(prev => ({
+        ...prev,
+        [idx]: res.data || []
+      }));
+    } catch (err) {
+      console.error("Error fetching address suggestions", err);
+    }
+  };
+
+  const selectAddressSuggestion = (idx, suggestion) => {
+    const updated = [...formData.locations];
+    updated[idx] = {
+      ...updated[idx],
+      address: suggestion.display_name,
+      latitude: parseFloat(suggestion.lat),
+      longitude: parseFloat(suggestion.lon)
+    };
+    const newFormData = { ...formData, locations: updated };
+    setFormData(newFormData);
+    saveDraft(newFormData);
+    setAddressSuggestions(prev => ({ ...prev, [idx]: [] }));
   };
 
   // Base64 file uploader
@@ -1137,8 +1169,31 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
                         </div>
                         <div>
                           <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Search Address Location</label>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <input type="text" value={loc.address} onChange={e => handleNestedChange('locations', idx, 'address', e.target.value)} placeholder="Search location address..." style={{ flex: 1, padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box' }} />
+                          <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
+                            <div style={{ flex: 1, position: 'relative' }}>
+                              <input 
+                                type="text" 
+                                value={loc.address} 
+                                onChange={e => handleAddressInputChange(idx, e.target.value)} 
+                                placeholder="Type address (e.g. MG Road, Bengaluru)..." 
+                                style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '0.8rem', boxSizing: 'border-box' }} 
+                              />
+                              {addressSuggestions[idx] && addressSuggestions[idx].length > 0 && (
+                                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '4px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 100, maxHeight: '180px', overflowY: 'auto', marginTop: '2px' }}>
+                                  {addressSuggestions[idx].map((suggestion, sIdx) => (
+                                    <div 
+                                      key={sIdx} 
+                                      onClick={() => selectAddressSuggestion(idx, suggestion)}
+                                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem', color: '#334155', cursor: 'pointer', borderBottom: '1px solid #f1f5f9', transition: 'background-color 0.2s' }}
+                                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                                      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
+                                    >
+                                      📍 {suggestion.display_name}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                             <button
                               type="button"
                               onClick={() => handleSearchAddress(idx)}
