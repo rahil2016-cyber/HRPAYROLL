@@ -21,6 +21,8 @@ import {
 export default function PortalSelection() {
   const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [insightRole, setInsightRole] = useState('Developer');
+  const [insightCountry, setInsightCountry] = useState('India');
   
   // Navigation & Page Section state
   const [activeTab, setActiveTab] = useState('home'); // home, services, about, contact
@@ -173,70 +175,313 @@ export default function PortalSelection() {
       <main style={{ flex: 1 }}>
         {activeTab === 'home' && (
           <>
-            {/* Hero Section */}
+            {/* Curved Dark Green Hero Section */}
             <section style={{
-              backgroundImage: `linear-gradient(180deg, ${themeLightBlue} 0%, #ffffff 100%)`,
-              padding: '5rem 1.5rem 4rem 1.5rem',
-              textAlign: 'center'
+              backgroundColor: '#123328',
+              color: '#ffffff',
+              padding: '4rem 2rem 5rem 2rem',
+              borderRadius: '0 0 40px 40px',
+              position: 'relative',
+              overflow: 'hidden'
             }}>
-              <h1 style={{
-                fontSize: '2.8rem',
-                fontWeight: 800,
-                color: themeBlue,
-                margin: '0 0 1.25rem 0',
-                letterSpacing: '-0.02em'
+              <div style={{
+                maxWidth: '1200px',
+                margin: '0 auto',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                gap: '4rem',
+                alignItems: 'center'
               }}>
-                HR & Payroll Made Simple
-              </h1>
+                {/* Left Column: Text & CTA */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', zIndex: 5 }}>
+                  <span style={{
+                    color: '#a3e635',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase'
+                  }}>
+                    FOR HR LEADERS & FOUNDERS BUILDING GLOBAL TEAMS
+                  </span>
+                  
+                  <h1 style={{
+                    fontSize: '3.6rem',
+                    fontWeight: 800,
+                    lineHeight: 1.1,
+                    margin: 0,
+                    letterSpacing: '-0.02em'
+                  }}>
+                    All your global employment needs in <span style={{ color: '#a3e635' }}>one place</span>
+                  </h1>
+                  
+                  <p style={{
+                    fontSize: '1.1rem',
+                    color: '#9fd3c4',
+                    lineHeight: 1.6,
+                    margin: 0,
+                    maxWidth: '480px'
+                  }}>
+                    Build your global team in 180+ countries without opening local offices. Our easy-to-use global HR platform helps you hire remotely, manage payroll, and ensure compliance ethically, with real employment experts by your side.
+                  </p>
+                  
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => setShowDemoModal(true)}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        color: '#123328',
+                        border: 'none',
+                        padding: '0.9rem 2rem',
+                        borderRadius: '30px',
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      Book a Demo
+                    </button>
+                    <button
+                      onClick={() => {
+                        const target = document.getElementById('gateways');
+                        if (target) target.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      style={{
+                        backgroundColor: 'transparent',
+                        color: '#ffffff',
+                        border: '2px solid #ffffff',
+                        padding: '0.9rem 2rem',
+                        borderRadius: '30px',
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <span>Launch Portals</span>
+                      <MdArrowForward size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Column: Cards Collage */}
+                <div style={{
+                  position: 'relative',
+                  minHeight: '400px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 5
+                }}>
+                  {/* Card 1: Interactive Salary Insights Tool */}
+                  <div style={{
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    padding: '1.25rem',
+                    borderRadius: '16px',
+                    width: '280px',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+                    position: 'absolute',
+                    top: '10px',
+                    left: '5%',
+                    zIndex: 3
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#123328' }}>Salary Insights Tool</span>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      <div>
+                        <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '0.2rem' }}>Role</label>
+                        <select 
+                          value={insightRole}
+                          onChange={e => setInsightRole(e.target.value)}
+                          style={{ width: '100%', padding: '0.35rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.75rem', backgroundColor: '#f8fafc' }}
+                        >
+                          <option value="Developer">Senior Software Developer</option>
+                          <option value="Designer">UI/UX Designer</option>
+                          <option value="Manager">Product Manager</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '0.2rem' }}>Country</label>
+                        <select
+                          value={insightCountry}
+                          onChange={e => setInsightCountry(e.target.value)}
+                          style={{ width: '100%', padding: '0.35rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.75rem', backgroundColor: '#f8fafc' }}
+                        >
+                          <option value="India">🇮🇳 India</option>
+                          <option value="Spain">🇪🇸 Spain</option>
+                          <option value="USA">🇺🇸 United States</option>
+                        </select>
+                      </div>
+
+                      <div style={{
+                        marginTop: '0.5rem',
+                        padding: '0.75rem',
+                        backgroundColor: '#f0fdf4',
+                        borderRadius: '8px',
+                        border: '1px solid #bbf7d0',
+                        textAlign: 'center'
+                      }}>
+                        <span style={{ fontSize: '0.65rem', color: '#166534', display: 'block', fontWeight: 600 }}>Estimated Gross Pay</span>
+                        <strong style={{ fontSize: '0.9rem', color: '#14532d' }}>
+                          {insightRole === 'Developer' && insightCountry === 'India' && '₹1,850,000 / yr'}
+                          {insightRole === 'Developer' && insightCountry === 'Spain' && '€55,000 / yr'}
+                          {insightRole === 'Developer' && insightCountry === 'USA' && '$135,000 / yr'}
+                          
+                          {insightRole === 'Designer' && insightCountry === 'India' && '₹1,400,000 / yr'}
+                          {insightRole === 'Designer' && insightCountry === 'Spain' && '€45,000 / yr'}
+                          {insightRole === 'Designer' && insightCountry === 'USA' && '$110,000 / yr'}
+                          
+                          {insightRole === 'Manager' && insightCountry === 'India' && '₹2,600,000 / yr'}
+                          {insightRole === 'Manager' && insightCountry === 'Spain' && '€75,000 / yr'}
+                          {insightRole === 'Manager' && insightCountry === 'USA' && '$160,000 / yr'}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Full-Time Employee (Erick Carvalho) */}
+                  <div style={{
+                    backgroundColor: '#d9f99d',
+                    color: '#1a2e05',
+                    padding: '1.25rem',
+                    borderRadius: '16px',
+                    width: '200px',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+                    position: 'absolute',
+                    right: '5%',
+                    top: '40px',
+                    zIndex: 2
+                  }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#a3e635', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: '#1a2e05' }}>EC</div>
+                      <div>
+                        <strong style={{ fontSize: '0.85rem', display: 'block' }}>Erick Carvalho</strong>
+                        <span style={{ fontSize: '0.65rem', color: '#4d7c0f', fontWeight: 600 }}>Lead Programmer</span>
+                      </div>
+                    </div>
+                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full-Time Employee</span>
+                      <span style={{ fontSize: '1rem' }}>🇧🇷</span>
+                    </div>
+                  </div>
+
+                  {/* Card 3: Contractor (Angelika Weber) */}
+                  <div style={{
+                    backgroundColor: '#7e22ce',
+                    color: '#ffffff',
+                    padding: '1.25rem',
+                    borderRadius: '16px',
+                    width: '200px',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+                    position: 'absolute',
+                    bottom: '10px',
+                    right: '15%',
+                    zIndex: 4
+                  }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#c084fc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: '#7e22ce' }}>AW</div>
+                      <div>
+                        <strong style={{ fontSize: '0.85rem', display: 'block' }}>Angelika Weber</strong>
+                        <span style={{ fontSize: '0.65rem', color: '#e9d5ff' }}>Data Analyst</span>
+                      </div>
+                    </div>
+                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contractor</span>
+                      <span style={{ fontSize: '1rem' }}>🇩🇪</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Logos Bar */}
+              <div style={{
+                marginTop: '4rem',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                paddingTop: '2rem',
+                display: 'flex',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                gap: '2.5rem',
+                alignItems: 'center',
+                opacity: 0.8
+              }}>
+                {['Brex', 'AUTOMATTIC', 'BADOO', 'MEWS', 'Payhawk', 'CHILI PIPER', 'lokalise', 'Bloom'].map((logo, idx) => (
+                  <span key={idx} style={{
+                    fontSize: '1rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.05em',
+                    color: '#9fd3c4',
+                    fontFamily: "'Outfit', sans-serif"
+                  }}>
+                    {logo}
+                  </span>
+                ))}
+              </div>
+            </section>
+
+            {/* Middle Section Title */}
+            <section style={{
+              maxWidth: '900px',
+              margin: '5rem auto 2rem auto',
+              textAlign: 'center',
+              padding: '0 1.5rem'
+            }}>
+              <h2 style={{
+                fontSize: '2.6rem',
+                fontWeight: 800,
+                color: '#123328',
+                lineHeight: 1.2,
+                letterSpacing: '-0.02em',
+                marginBottom: '1rem'
+              }}>
+                Hire, pay, and support your global team—ethically and compliantly
+              </h2>
               <p style={{
                 fontSize: '1.2rem',
                 color: '#475569',
                 maxWidth: '680px',
-                margin: '0 auto 2.5rem auto',
-                lineHeight: '1.6'
+                margin: '0 auto',
+                lineHeight: 1.6
               }}>
-                A powerful, multi-tenant portal for payroll generation, geographic GPS geofence clock-in, leaves management, and corporate expense reimbursement claims.
+                An all-in-one trusted platform for global payroll, HR compliance, and local employee benefits.
               </p>
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                <button
-                  onClick={() => setShowDemoModal(true)}
-                  style={{
-                    backgroundColor: themeBlue,
-                    color: '#ffffff',
-                    border: 'none',
-                    padding: '0.8rem 1.8rem',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 10px rgba(0, 71, 184, 0.2)'
-                  }}
-                >
-                  Get Started Now
-                </button>
-              </div>
             </section>
 
             {/* Gateway Selection Section */}
-            <section style={{
+            <section id="gateways" style={{
               maxWidth: '1200px',
               margin: '0 auto',
-              padding: '3rem 1.5rem 5rem 1.5rem'
+              padding: '3rem 1.5rem 6rem 1.5rem'
             }}>
-              <h2 style={{
-                fontSize: '1.6rem',
-                fontWeight: 700,
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: 800,
                 textAlign: 'center',
-                marginBottom: '2.5rem',
-                color: themeBlue
+                marginBottom: '3rem',
+                color: '#123328',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
               }}>
-                Select Your Workspace Gateway
-              </h2>
+                Choose your gateway portal to enter the workspace
+              </h3>
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                gap: '1.5rem'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '2rem'
               }}>
                 {portals.map((portal, index) => {
                   const IconComponent = portal.icon;
@@ -249,61 +494,66 @@ export default function PortalSelection() {
                       onMouseEnter={() => setHoveredCard(index)}
                       onMouseLeave={() => setHoveredCard(null)}
                       style={{
-                        backgroundColor: isHovered ? themeLightBlue : '#ffffff',
-                        border: `2px solid ${isHovered ? themeBlue : '#e2e8f0'}`,
-                        borderRadius: '16px',
-                        padding: '2rem 1.5rem',
+                        backgroundColor: '#ffffff',
+                        border: `1px solid ${isHovered ? '#123328' : '#e2e8f0'}`,
+                        borderRadius: '24px',
+                        padding: '2.5rem 2rem',
                         cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
-                        boxShadow: isHovered ? '0 12px 20px rgba(0, 71, 184, 0.08)' : '0 4px 6px rgba(0,0,0,0.02)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
+                        boxShadow: isHovered 
+                          ? '0 20px 25px -5px rgba(18, 51, 40, 0.1), 0 10px 10px -5px rgba(18, 51, 40, 0.04)' 
+                          : '0 4px 6px -1px rgba(0,0,0,0.05)',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        minHeight: '260px'
+                        minHeight: '300px'
                       }}
                     >
                       <div>
                         {/* Icon Wrapper */}
                         <div style={{
-                          width: '46px',
-                          height: '46px',
-                          borderRadius: '10px',
-                          backgroundColor: isHovered ? '#ffffff' : themeLightBlue,
-                          color: themeBlue,
+                          width: '52px',
+                          height: '52px',
+                          borderRadius: '14px',
+                          backgroundColor: isHovered ? '#123328' : '#f0fdf4',
+                          color: isHovered ? '#ffffff' : '#123328',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          marginBottom: '1.25rem'
+                          marginBottom: '1.5rem',
+                          transition: 'all 0.3s'
                         }}>
-                          <IconComponent size={24} />
+                          <IconComponent size={26} />
                         </div>
 
                         <span style={{
                           fontSize: '0.75rem',
-                          fontWeight: 700,
+                          fontWeight: 800,
                           textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          color: themeBlue,
+                          letterSpacing: '0.08em',
+                          color: '#123328',
                           display: 'block',
-                          marginBottom: '0.25rem'
+                          marginBottom: '0.35rem',
+                          opacity: 0.7
                         }}>
                           {portal.subtitle}
                         </span>
 
-                        <h3 style={{
-                          fontSize: '1.15rem',
-                          fontWeight: 700,
-                          color: themeDarkBlue,
-                          marginBottom: '0.5rem'
+                        <h4 style={{
+                          fontSize: '1.3rem',
+                          fontWeight: 800,
+                          color: '#0f172a',
+                          marginBottom: '0.75rem',
+                          letterSpacing: '-0.01em'
                         }}>
                           {portal.title}
-                        </h3>
+                        </h4>
 
                         <p style={{
                           color: '#475569',
-                          fontSize: '0.85rem',
-                          lineHeight: '1.5',
+                          fontSize: '0.9rem',
+                          lineHeight: '1.6',
                           margin: 0
                         }}>
                           {portal.description}
@@ -311,16 +561,19 @@ export default function PortalSelection() {
                       </div>
 
                       <div style={{
-                        marginTop: '1.25rem',
+                        marginTop: '1.75rem',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        color: themeBlue,
-                        fontWeight: 600,
-                        fontSize: '0.85rem'
+                        color: '#123328',
+                        fontWeight: 700,
+                        fontSize: '0.9rem'
                       }}>
-                        <span>Go to Gateway</span>
-                        <MdArrowForward size={16} />
+                        <span>Enter Workspace</span>
+                        <MdArrowForward size={18} style={{
+                          transform: isHovered ? 'translateX(4px)' : 'translateX(0)',
+                          transition: 'transform 0.2s'
+                        }} />
                       </div>
                     </div>
                   );
