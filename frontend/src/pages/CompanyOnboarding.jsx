@@ -33,7 +33,7 @@ const INDIAN_BANKS = [
   { code: 'IPOS', name: 'INDIA POST PAYMENTS BANK' }
 ];
 
-export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) {
+export default function CompanyOnboarding({ token, user, onOnboardingSuccess, onLogout }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
@@ -503,8 +503,29 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
         </nav>
 
         {/* Footer info */}
-        <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1rem', fontSize: '0.75rem', color: '#64748b' }}>
-          <span>Logged in as <strong>{user?.name}</strong></span>
+        <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Logged in as <strong>{user?.name}</strong></span>
+          <button
+            onClick={onLogout}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.55rem',
+              backgroundColor: 'rgba(227, 6, 19, 0.1)',
+              border: 'none',
+              borderRadius: '6px',
+              color: '#E30613',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              width: '100%',
+              transition: 'background-color 0.2s'
+            }}
+          >
+            Sign Out
+          </button>
         </div>
       </aside>
 

@@ -76,7 +76,7 @@ export default function App() {
               token ? (
                 user?.role === 'hr' ? (
                   parseInt(user?.onboarding_completed) === 0 ? (
-                    <CompanyOnboarding token={token} user={user} onOnboardingSuccess={handleLoginSuccess} />
+                    <CompanyOnboarding token={token} user={user} onOnboardingSuccess={handleLoginSuccess} onLogout={handleLogout} />
                   ) : (
                     <Layout user={user} onLogout={handleLogout}>
                       <HRDashboard token={token} />

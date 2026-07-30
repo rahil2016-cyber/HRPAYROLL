@@ -139,7 +139,7 @@ export default function Layout({ user, children, onLogout }) {
         </div>
 
         {/* Sidebar Menu Items */}
-        <nav style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <nav style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', overflowY: 'auto' }}>
           {menuItems.map((item, idx) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path || 
