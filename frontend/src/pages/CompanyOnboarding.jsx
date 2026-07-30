@@ -199,7 +199,7 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
       return;
     }
     try {
-      const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(loc.address)}`);
+      const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(loc.address)}&countrycodes=in`);
       if (response.data && response.data.length > 0) {
         const result = response.data[0];
         const updated = [...formData.locations];
@@ -213,7 +213,7 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
         setFormData(newFormData);
         saveDraft(newFormData);
       } else {
-        alert("Location not found. Please try a more general search term.");
+        alert("Location not found in India. Please try a more general search term.");
       }
     } catch (err) {
       alert("Error searching location. Please manually enter latitude and longitude.");
@@ -227,7 +227,7 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess }) 
       return;
     }
     try {
-      const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&limit=5`);
+      const res = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&countrycodes=in&limit=5`);
       setAddressSuggestions(prev => ({
         ...prev,
         [idx]: res.data || []
