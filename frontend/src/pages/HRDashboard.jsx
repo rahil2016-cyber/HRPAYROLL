@@ -111,6 +111,7 @@ export default function HRDashboard({ token }) {
   const [selectedCycleId, setSelectedCycleId] = useState(null);
   const [payslipsList, setPayslipsList] = useState([]);
   const [caPartners, setCaPartners] = useState([]);
+  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().substring(0, 10));
   
   // Running payroll cycle
   const [runMonth, setRunMonth] = useState(String(new Date().getMonth() + 1));
@@ -532,7 +533,7 @@ export default function HRDashboard({ token }) {
       });
       setAttendanceMetrics(attStatsRes.data);
 
-      const attLogsRes = await axios.get(window.API_BASE_URL + '/index.php?route=/api/hr/attendance', {
+      const attLogsRes = await axios.get(`${window.API_BASE_URL}/index.php?route=/api/hr/attendance&date=${attendanceDate}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setHrAttendanceRecords(attLogsRes.data.attendance || []);
@@ -546,6 +547,17 @@ export default function HRDashboard({ token }) {
       console.error("Error loading HR dashboard data", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAttendanceByDate = async (selectedDate) => {
+    try {
+      const res = await axios.get(`${window.API_BASE_URL}/index.php?route=/api/hr/attendance&date=${selectedDate}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setHrAttendanceRecords(res.data.attendance || []);
+    } catch (err) {
+      console.error("Error fetching attendance logs for date", err);
     }
   };
 
@@ -1300,7 +1312,28 @@ export default function HRDashboard({ token }) {
             {/* Table list */}
             <div className="premium-card" style={{ padding: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Daily Attendance Roster</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Daily Attendance Roster</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>Select Date:</label>
+                    <input 
+                      type="date" 
+                      value={attendanceDate} 
+                      onChange={e => {
+                        setAttendanceDate(e.target.value);
+                        fetchAttendanceByDate(e.target.value);
+                      }} 
+                      style={{
+                        padding: '0.35rem 0.6rem',
+                        borderRadius: '4px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.8rem',
+                        color: '#334155',
+                        backgroundColor: '#fff'
+                      }} 
+                    />
+                  </div>
+                </div>
                 <button
                   type="button"
                   onClick={handleExportAttendance}
