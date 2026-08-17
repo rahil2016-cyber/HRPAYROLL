@@ -1112,8 +1112,8 @@ export default function PortalSelection() {
                   <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Self-Managed</span>
                   <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0.25rem 0 1rem 0' }}>Platform Services</h3>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '1.5rem' }}>
-                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a' }}>₹4,999</span>
-                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>/ month</span>
+                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a' }}>₹149</span>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>/ employee / month</span>
                   </div>
                   <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: '#475569', lineHeight: '2', marginBottom: '2rem' }}>
                     <li>Raise unlimited Client Tax Invoices</li>
@@ -1149,8 +1149,8 @@ export default function PortalSelection() {
                   <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Assistance</span>
                   <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', margin: '0.25rem 0 1rem 0' }}>Complete Payroll Service</h3>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '1.5rem' }}>
-                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#93c5fd' }}>₹9,999</span>
-                    <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>/ month</span>
+                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#93c5fd' }}>₹499</span>
+                    <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>/ employee / month</span>
                   </div>
                   <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: '#cbd5e1', lineHeight: '2', marginBottom: '2rem' }}>
                     <li>Everything in Platform Services</li>
