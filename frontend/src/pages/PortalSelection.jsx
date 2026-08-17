@@ -925,7 +925,6 @@ export default function PortalSelection() {
                   return (
                     <div
                       key={portal.id}
-                      onClick={() => navigate(portal.route)}
                       onMouseEnter={() => setHoveredCard(index)}
                       onMouseLeave={() => setHoveredCard(null)}
                       style={{
@@ -933,7 +932,7 @@ export default function PortalSelection() {
                         border: `1.5px solid ${isHovered ? '#0047B8' : '#e2e8f0'}`,
                         borderRadius: '24px',
                         padding: '2.5rem 2rem',
-                        cursor: 'pointer',
+                        cursor: 'default',
                         transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
                         transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
                         boxShadow: isHovered 
@@ -1014,8 +1013,7 @@ export default function PortalSelection() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          transition: 'all 0.3s',
-                          transform: isHovered ? 'scale(1.1) translateX(2px)' : 'scale(1)'
+                          transition: 'all 0.3s'
                         }}>
                           <MdArrowForward size={20} />
                         </div>
