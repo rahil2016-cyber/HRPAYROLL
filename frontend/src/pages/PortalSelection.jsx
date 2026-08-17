@@ -21,6 +21,7 @@ import {
 export default function PortalSelection() {
   const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [isHoveredDashboard, setIsHoveredDashboard] = useState(false);
   const [insightRole, setInsightRole] = useState('Developer');
   const [insightCountry, setInsightCountry] = useState('India');
   
@@ -47,28 +48,28 @@ export default function PortalSelection() {
 
   const portals = [
     {
-      id: 'employee',
-      title: 'Employee Portal',
-      subtitle: 'Employee Self Service',
-      description: 'Clock-in using GPS geofencing, view payroll payslips, check active holidays, and apply for leaves.',
-      icon: MdPeople,
-      route: '/login/employee'
-    },
-    {
       id: 'hr',
-      title: 'HR Administrator',
-      subtitle: 'Company Operations',
-      description: 'Onboard employees, configure office branches, track GPS check-ins, approve leaves, and establish rules.',
+      title: 'Hire',
+      subtitle: '01',
+      description: 'Onboard employees quickly and effortlessly.',
       icon: MdBusiness,
       route: '/login/hr'
     },
     {
       id: 'finance',
-      title: 'Finance & CA Portal',
-      subtitle: 'Payroll & Compliance',
-      description: 'Review monthly payroll logs, configure salary details, approve expense claims, and adjust tax brackets.',
+      title: 'Pay',
+      subtitle: '02',
+      description: 'Automate payroll and payments with ease.',
       icon: MdAttachMoney,
       route: '/login/finance'
+    },
+    {
+      id: 'employee',
+      title: 'Manage',
+      subtitle: '03',
+      description: 'Track performance, leave, and compliance in one place.',
+      icon: MdPeople,
+      route: '/login/employee'
     }
   ];
 
@@ -126,6 +127,34 @@ export default function PortalSelection() {
           0% { opacity: 0.9; }
           50% { opacity: 1; }
           100% { opacity: 0.9; }
+        }
+        @keyframes floatCard1 {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-12px); }
+          100% { transform: translateY(0px); }
+        }
+        @keyframes floatCard2 {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(12px); }
+          100% { transform: translateY(0px); }
+        }
+        @keyframes floatCard3 {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+          100% { transform: translateY(0px); }
+        }
+        @keyframes floatCard4 {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(8px); }
+          100% { transform: translateY(0px); }
+        }
+        .hero-dot-grid {
+          background-color: #ffffff;
+          background-image: 
+            radial-gradient(circle at 10% 20%, rgba(0, 71, 184, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(0, 71, 184, 0.03) 0%, transparent 50%),
+            radial-gradient(rgba(0, 71, 184, 0.08) 1.5px, transparent 1.5px);
+          background-size: 100% 100%, 100% 100%, 24px 24px;
         }
       `}</style>
 
@@ -224,57 +253,88 @@ export default function PortalSelection() {
         {activeTab === 'home' && (
           <>
             {/* Hero Section */}
-            <section style={{
-              backgroundImage: 'linear-gradient(135deg, #f0f6ff 0%, #ffffff 100%)',
-              padding: '6rem 1.5rem 4rem 1.5rem',
+            <section className="hero-dot-grid" style={{
+              padding: '6rem 1.5rem 5rem 1.5rem',
               overflow: 'hidden',
               position: 'relative'
             }}>
+              {/* Soft decorative light blur circles */}
+              <div style={{
+                position: 'absolute',
+                top: '-10%',
+                right: '10%',
+                width: '400px',
+                height: '400px',
+                background: 'radial-gradient(circle, rgba(0, 71, 184, 0.06) 0%, transparent 70%)',
+                filter: 'blur(50px)',
+                zIndex: 1
+              }} />
+              <div style={{
+                position: 'absolute',
+                bottom: '-10%',
+                left: '5%',
+                width: '300px',
+                height: '300px',
+                background: 'radial-gradient(circle, rgba(0, 71, 184, 0.04) 0%, transparent 70%)',
+                filter: 'blur(40px)',
+                zIndex: 1
+              }} />
+
               <div style={{
                 maxWidth: '1200px',
                 margin: '0 auto',
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                gap: '4rem',
-                alignItems: 'center'
+                gap: '4.5rem',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 2
               }}>
                 {/* Left Column: Text Content */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', zIndex: 10 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', zIndex: 10 }}>
                   <div style={{
                     alignSelf: 'flex-start',
                     backgroundColor: '#e6f0ff',
                     color: '#0047B8',
-                    padding: '0.4rem 1rem',
+                    padding: '0.45rem 1.1rem',
                     borderRadius: '30px',
                     fontSize: '0.75rem',
                     fontWeight: 800,
-                    letterSpacing: '0.05em'
+                    letterSpacing: '0.08em',
+                    boxShadow: '0 2px 8px rgba(0, 71, 184, 0.05)'
                   }}>
                     SMART HR. SIMPLE PAYROLL.
                   </div>
                   
                   <h1 style={{
-                    fontSize: '3.8rem',
+                    fontSize: '3.6rem',
                     fontWeight: 900,
                     lineHeight: 1.15,
                     margin: 0,
                     color: '#0f172a',
-                    letterSpacing: '-0.02em'
+                    letterSpacing: '-0.02em',
+                    fontFamily: "'Outfit', sans-serif"
                   }}>
-                    Everything you need to manage <span style={{ color: '#0047B8' }}>your team</span>
+                    Everything you need to manage{' '}
+                    <span style={{ position: 'relative', display: 'inline-block', color: '#0047B8' }}>
+                      your team
+                      <svg style={{ position: 'absolute', bottom: '-8px', left: 0, width: '105%', height: '12px' }} viewBox="0 0 100 10" preserveAspectRatio="none">
+                        <path d="M0,5 Q50,9 100,5" stroke="#0047B8" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+                      </svg>
+                    </span>
                   </h1>
                   
                   <p style={{
-                    fontSize: '1.15rem',
+                    fontSize: '1.1rem',
                     color: '#475569',
-                    lineHeight: 1.6,
+                    lineHeight: 1.65,
                     margin: 0,
                     maxWidth: '480px'
                   }}>
                     Hire, pay, and manage employees effortlessly. Automate payroll, ensure compliance, and focus on what matters most.
                   </p>
                   
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     <button
                       onClick={() => setShowDemoModal(true)}
                       style={{
@@ -289,11 +349,17 @@ export default function PortalSelection() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        boxShadow: '0 8px 20px rgba(0, 71, 184, 0.25)',
-                        transition: 'transform 0.2s'
+                        boxShadow: '0 8px 25px rgba(0, 71, 184, 0.25)',
+                        transition: 'transform 0.2s, background-color 0.2s'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.backgroundColor = '#003bab';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.backgroundColor = '#0047B8';
+                      }}
                     >
                       <span>Book a Demo</span>
                       <MdArrowForward size={18} />
@@ -312,17 +378,19 @@ export default function PortalSelection() {
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
+                        gap: '0.6rem',
                         boxShadow: '0 4px 6px rgba(0,0,0,0.02)',
                         transition: 'all 0.2s'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = '#0047B8';
                         e.currentTarget.style.backgroundColor = '#f0f6ff';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.borderColor = '#cbd5e1';
                         e.currentTarget.style.backgroundColor = '#ffffff';
+                        e.currentTarget.style.transform = 'translateY(0)';
                       }}
                     >
                       <div style={{
@@ -342,12 +410,68 @@ export default function PortalSelection() {
                       <span>See How It Works</span>
                     </button>
                   </div>
+
+                  {/* Avatar stack "Trusted by..." */}
+                  <div style={{ marginTop: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {[
+                          { name: 'US', bg: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)' },
+                          { name: 'AN', bg: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)' },
+                          { name: 'JD', bg: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' }
+                        ].map((av, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '50%',
+                              background: av.bg,
+                              border: '2px solid #ffffff',
+                              marginLeft: idx === 0 ? 0 : '-10px',
+                              boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '10px',
+                              fontWeight: 'bold',
+                              color: '#1e293b',
+                              zIndex: 3 - idx
+                            }}
+                          >
+                            {av.name}
+                          </div>
+                        ))}
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          backgroundColor: '#0047B8',
+                          color: '#ffffff',
+                          border: '2px solid #ffffff',
+                          marginLeft: '-10px',
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          zIndex: 0
+                        }}>
+                          +2k
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+                        Trusted by 2,000+ HR teams worldwide
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Right Column: 3D Laptop Mockup & Floating Elements */}
+                {/* Right Column: 3D Laptop Mockup & Glassmorphic Floating Badges */}
                 <div style={{
                   position: 'relative',
-                  minHeight: '460px',
+                  minHeight: '480px',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -355,48 +479,209 @@ export default function PortalSelection() {
                 }}>
                   {/* Floating Glassy Sphere 1 */}
                   <div style={{
-                    width: '40px',
-                    height: '40px',
+                    width: '45px',
+                    height: '45px',
                     borderRadius: '50%',
                     background: 'radial-gradient(circle at 30% 30%, #93c5fd 0%, #3b82f6 70%, #1e3a8a 100%)',
-                    boxShadow: 'inset -2px -2px 8px rgba(0,0,0,0.3), 0 10px 20px rgba(59,130,246,0.3)',
+                    boxShadow: 'inset -2px -2px 10px rgba(0,0,0,0.35), 0 12px 24px rgba(59,130,246,0.35)',
                     position: 'absolute',
-                    top: '20px',
-                    right: '15%',
+                    top: '10px',
+                    right: '12%',
                     zIndex: 12,
                     animation: 'float 6s ease-in-out infinite'
                   }} />
 
                   {/* Floating Glassy Sphere 2 */}
                   <div style={{
-                    width: '24px',
-                    height: '24px',
+                    width: '26px',
+                    height: '26px',
                     borderRadius: '50%',
                     background: 'radial-gradient(circle at 30% 30%, #e0f2fe 0%, #60a5fa 70%, #1d4ed8 100%)',
-                    boxShadow: 'inset -1px -1px 4px rgba(0,0,0,0.3), 0 6px 12px rgba(59,130,246,0.2)',
+                    boxShadow: 'inset -1px -1px 5px rgba(0,0,0,0.3), 0 8px 16px rgba(59,130,246,0.2)',
                     position: 'absolute',
-                    bottom: '120px',
-                    left: '5%',
+                    bottom: '80px',
+                    left: '2%',
                     zIndex: 12,
-                    animation: 'float 8s ease-in-out infinite 1s'
+                    animation: 'float 8s ease-in-out infinite 1.5s'
                   }} />
 
-                  {/* Main Laptop 3D Body Wrapper */}
+                  {/* Floating Card 1: Payroll Processed Success */}
                   <div style={{
-                    animation: 'laptopFloat 5s ease-in-out infinite',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.5)',
+                    boxShadow: '0 12px 30px rgba(0, 71, 184, 0.1)',
+                    borderRadius: '16px',
+                    padding: '0.65rem 1rem',
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
-                    zIndex: 10
+                    gap: '0.65rem',
+                    zIndex: 20,
+                    position: 'absolute',
+                    top: '20%',
+                    left: '-8%',
+                    animation: 'floatCard1 5.5s ease-in-out infinite'
                   }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      backgroundColor: '#dcfce7',
+                      color: '#16a34a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      fontWeight: 'bold'
+                    }}>✔</div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '9px', fontWeight: 800, color: '#0f172a' }}>Payroll Processed</span>
+                      <span style={{ fontSize: '7px', fontWeight: 600, color: '#16a34a' }}>Success</span>
+                    </div>
+                  </div>
+
+                  {/* Floating Card 2: New Employee Onboarded */}
+                  <div style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.5)',
+                    boxShadow: '0 12px 30px rgba(0, 71, 184, 0.1)',
+                    borderRadius: '16px',
+                    padding: '0.65rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    zIndex: 20,
+                    position: 'absolute',
+                    bottom: '18%',
+                    left: '-4%',
+                    animation: 'floatCard2 6.5s ease-in-out infinite 0.75s'
+                  }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      backgroundColor: '#e0f2fe',
+                      color: '#0284c7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px'
+                    }}>👤</div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '9px', fontWeight: 800, color: '#0f172a' }}>New Employee Onboarded</span>
+                      <span style={{ fontSize: '7px', fontWeight: 600, color: '#64748b' }}>256 Total</span>
+                    </div>
+                  </div>
+
+                  {/* Floating Card 3: Leave Approved */}
+                  <div style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.5)',
+                    boxShadow: '0 12px 30px rgba(0, 71, 184, 0.1)',
+                    borderRadius: '16px',
+                    padding: '0.65rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    zIndex: 20,
+                    position: 'absolute',
+                    top: '12%',
+                    right: '-8%',
+                    animation: 'floatCard3 7.5s ease-in-out infinite 1.25s'
+                  }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      backgroundColor: '#dcfce7',
+                      color: '#16a34a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      fontWeight: 'bold'
+                    }}>✔</div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '9px', fontWeight: 800, color: '#0f172a' }}>Leave Approved</span>
+                      <span style={{ fontSize: '7px', fontWeight: 600, color: '#16a34a' }}>Done</span>
+                    </div>
+                  </div>
+
+                  {/* Floating Card 4: 100% Compliance */}
+                  <div style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.5)',
+                    boxShadow: '0 12px 30px rgba(0, 71, 184, 0.1)',
+                    borderRadius: '16px',
+                    padding: '0.65rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    zIndex: 20,
+                    position: 'absolute',
+                    bottom: '22%',
+                    right: '-6%',
+                    animation: 'floatCard4 6s ease-in-out infinite 0.25s'
+                  }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      backgroundColor: '#e6f0ff',
+                      color: '#0047B8',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px'
+                    }}>🛡</div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '9px', fontWeight: 800, color: '#0f172a' }}>100% Compliance</span>
+                      <span style={{ fontSize: '7px', fontWeight: 600, color: '#0047B8' }}>All Good</span>
+                    </div>
+                  </div>
+
+                  {/* Main Laptop 3D Body Wrapper */}
+                  <div 
+                    onMouseEnter={() => setIsHoveredDashboard(true)}
+                    onMouseLeave={() => setIsHoveredDashboard(false)}
+                    style={{
+                      transform: isHoveredDashboard 
+                        ? 'perspective(1200px) rotateY(-8deg) rotateX(6deg) rotateZ(-1deg) scale(1.02)' 
+                        : 'perspective(1200px) rotateY(-16deg) rotateX(10deg) rotateZ(-2deg)',
+                      transition: 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      zIndex: 10,
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Shadow floating underneath */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '-35px',
+                      left: '8%',
+                      width: '84%',
+                      height: '25px',
+                      backgroundColor: 'rgba(0, 71, 184, 0.15)',
+                      borderRadius: '50%',
+                      filter: 'blur(12px)',
+                      zIndex: -1,
+                      transition: 'transform 0.5s ease',
+                      transform: isHoveredDashboard ? 'scale(0.9) translateY(4px)' : 'scale(1)'
+                    }} />
+
                     {/* Screen Bezel / Container */}
                     <div style={{
-                      width: '440px',
-                      height: '290px',
+                      width: '450px',
+                      height: '295px',
                       backgroundColor: '#1e293b',
-                      borderRadius: '16px',
+                      borderRadius: '18px',
                       padding: '8px',
-                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.22)',
                       border: '2px solid #475569',
                       display: 'flex',
                       flexDirection: 'column'
@@ -405,7 +690,7 @@ export default function PortalSelection() {
                       <div style={{
                         flex: 1,
                         backgroundColor: '#f8fafc',
-                        borderRadius: '10px',
+                        borderRadius: '12px',
                         overflow: 'hidden',
                         display: 'flex',
                         fontFamily: "'Inter', sans-serif",
@@ -498,84 +783,140 @@ export default function PortalSelection() {
 
                     {/* Keyboard Base */}
                     <div style={{
-                      width: '480px',
+                      width: '490px',
                       height: '14px',
                       backgroundColor: '#cbd5e1',
                       borderRadius: '0 0 12px 12px',
                       borderBottom: '4px solid #94a3b8',
                       boxShadow: '0 10px 15px rgba(0,0,0,0.1)'
                     }} />
-
-                    {/* Pedestal Base (below laptop) */}
-                    <div style={{
-                      width: '320px',
-                      height: '24px',
-                      backgroundColor: '#e6f0ff',
-                      borderRadius: '50%',
-                      marginTop: '8px',
-                      border: '3px solid #0047B8',
-                      boxShadow: '0 15px 30px rgba(0, 71, 184, 0.15)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <div style={{ width: '90%', height: '80%', borderRadius: '50%', backgroundColor: '#0047B8', opacity: 0.1 }} />
-                    </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* Middle Section Title */}
+            {/* Statistics Bar Section */}
+            <section style={{ padding: '0 1.5rem', position: 'relative', zIndex: 30 }}>
+              <div style={{
+                maxWidth: '1100px',
+                margin: '-3rem auto 4rem auto',
+                backgroundColor: '#ffffff',
+                border: '1px solid rgba(0, 71, 184, 0.08)',
+                borderRadius: '24px',
+                boxShadow: '0 20px 40px rgba(0, 71, 184, 0.05)',
+                padding: '2rem',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '1.5rem',
+                alignItems: 'center'
+              }}>
+                {[
+                  {
+                    icon: '👥',
+                    val: '256+',
+                    lbl: 'Active Employees'
+                  },
+                  {
+                    icon: '💰',
+                    val: '₹12.5L+',
+                    lbl: 'Payroll Processed'
+                  },
+                  {
+                    icon: '🛡️',
+                    val: '100%',
+                    lbl: 'Compliance Rate'
+                  },
+                  {
+                    icon: '🏢',
+                    val: '50+',
+                    lbl: 'Companies Trust Us'
+                  }
+                ].map((item, idx) => (
+                  <div key={idx} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    borderRight: idx === 3 ? 'none' : '1px solid #f1f5f9',
+                    paddingRight: '1rem'
+                  }}>
+                    <div style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '50%',
+                      backgroundColor: '#e6f0ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.25rem'
+                    }}>
+                      {item.icon}
+                    </div>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{item.val}</h4>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>{item.lbl}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Middle Heading Section */}
             <section style={{
               maxWidth: '900px',
-              margin: '5rem auto 2rem auto',
+              margin: '3rem auto 1rem auto',
               textAlign: 'center',
               padding: '0 1.5rem'
             }}>
-              <h2 style={{
-                fontSize: '2.6rem',
+              <span style={{
+                fontSize: '0.8rem',
                 fontWeight: 800,
                 color: '#0047B8',
-                lineHeight: 1.2,
-                letterSpacing: '-0.02em',
-                marginBottom: '1rem'
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                display: 'block',
+                marginBottom: '0.5rem'
               }}>
-                Hire, pay, and support your global team—ethically and compliantly
+                — BUILT FOR MODERN TEAMS
+              </span>
+              <h2 style={{
+                fontSize: '2.5rem',
+                fontWeight: 800,
+                color: '#0f172a',
+                lineHeight: 1.25,
+                letterSpacing: '-0.02em',
+                margin: '0 0 1rem 0',
+                fontFamily: "'Outfit', sans-serif"
+              }}>
+                Hire, pay, and support your{' '}
+                <span style={{ position: 'relative', display: 'inline-block', color: '#0047B8' }}>
+                  global team
+                  <svg style={{ position: 'absolute', bottom: '-6px', left: 0, width: '105%', height: '8px' }} viewBox="0 0 100 10" preserveAspectRatio="none">
+                    <path d="M0,5 Q50,9 100,5" stroke="#0047B8" strokeWidth="3" fill="none" strokeLinecap="round" />
+                  </svg>
+                </span>
+                —ethically and compliantly
               </h2>
               <p style={{
-                fontSize: '1.2rem',
+                fontSize: '1.1rem',
                 color: '#475569',
                 maxWidth: '680px',
                 margin: '0 auto',
                 lineHeight: 1.6
               }}>
-                An all-in-one trusted platform for global payroll, HR compliance, and local employee benefits.
+                All the tools you need to simplify HR, payroll, and compliance in one powerful platform.
               </p>
             </section>
 
-            {/* Gateway Selection Section */}
+            {/* 3 Portal Gateway Selection Section */}
             <section id="gateways" style={{
               maxWidth: '1200px',
               margin: '0 auto',
-              padding: '3rem 1.5rem 6rem 1.5rem'
+              padding: '2rem 1.5rem 6rem 1.5rem'
             }}>
-              <h3 style={{
-                fontSize: '1.5rem',
-                fontWeight: 800,
-                textAlign: 'center',
-                marginBottom: '3rem',
-                color: '#0047B8',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}>
-                Choose your gateway portal to enter the workspace
-              </h3>
-
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '2rem'
+                gap: '2.25rem'
               }}>
                 {portals.map((portal, index) => {
                   const IconComponent = portal.icon;
@@ -589,53 +930,56 @@ export default function PortalSelection() {
                       onMouseLeave={() => setHoveredCard(null)}
                       style={{
                         backgroundColor: '#ffffff',
-                        border: `1px solid ${isHovered ? '#0047B8' : '#e2e8f0'}`,
+                        border: `1.5px solid ${isHovered ? '#0047B8' : '#e2e8f0'}`,
                         borderRadius: '24px',
                         padding: '2.5rem 2rem',
                         cursor: 'pointer',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
                         transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
                         boxShadow: isHovered 
-                          ? '0 20px 25px -5px rgba(0, 71, 184, 0.1), 0 10px 10px -5px rgba(0, 71, 184, 0.04)' 
-                          : '0 4px 6px -1px rgba(0,0,0,0.05)',
+                          ? '0 20px 30px rgba(0, 71, 184, 0.08)' 
+                          : '0 4px 6px rgba(0,0,0,0.02)',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        minHeight: '300px'
+                        minHeight: '260px',
+                        position: 'relative',
+                        overflow: 'hidden'
                       }}
                     >
+                      {/* Large background number overlay */}
+                      <span style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '20px',
+                        fontSize: '5rem',
+                        fontWeight: 900,
+                        color: 'rgba(0, 71, 184, 0.04)',
+                        userSelect: 'none',
+                        lineHeight: 1
+                      }}>
+                        {portal.subtitle}
+                      </span>
+
                       <div>
                         {/* Icon Wrapper */}
                         <div style={{
-                          width: '52px',
-                          height: '52px',
-                          borderRadius: '14px',
+                          width: '50px',
+                          height: '50px',
+                          borderRadius: '50%',
                           backgroundColor: isHovered ? '#0047B8' : '#e6f0ff',
                           color: isHovered ? '#ffffff' : '#0047B8',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          marginBottom: '1.5rem',
+                          marginBottom: '1.75rem',
                           transition: 'all 0.3s'
                         }}>
-                          <IconComponent size={26} />
+                          <IconComponent size={24} />
                         </div>
 
-                        <span style={{
-                          fontSize: '0.75rem',
-                          fontWeight: 800,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.08em',
-                          color: '#0047B8',
-                          display: 'block',
-                          marginBottom: '0.35rem',
-                          opacity: 0.7
-                        }}>
-                          {portal.subtitle}
-                        </span>
-
                         <h4 style={{
-                          fontSize: '1.3rem',
+                          fontSize: '1.4rem',
                           fontWeight: 800,
                           color: '#0f172a',
                           marginBottom: '0.75rem',
@@ -646,28 +990,35 @@ export default function PortalSelection() {
 
                         <p style={{
                           color: '#475569',
-                          fontSize: '0.9rem',
+                          fontSize: '0.95rem',
                           lineHeight: '1.6',
-                          margin: 0
+                          margin: 0,
+                          maxWidth: '85%'
                         }}>
                           {portal.description}
                         </p>
                       </div>
 
                       <div style={{
-                        marginTop: '1.75rem',
+                        marginTop: '2rem',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
-                        color: '#0047B8',
-                        fontWeight: 700,
-                        fontSize: '0.9rem'
+                        justifyContent: 'flex-end'
                       }}>
-                        <span>Enter Workspace</span>
-                        <MdArrowForward size={18} style={{
-                          transform: isHovered ? 'translateX(4px)' : 'translateX(0)',
-                          transition: 'transform 0.2s'
-                        }} />
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          backgroundColor: '#e6f0ff',
+                          color: '#0047B8',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.3s',
+                          transform: isHovered ? 'scale(1.1) translateX(2px)' : 'scale(1)'
+                        }}>
+                          <MdArrowForward size={20} />
+                        </div>
                       </div>
                     </div>
                   );
@@ -684,7 +1035,7 @@ export default function PortalSelection() {
             padding: '4rem 1.5rem',
             lineHeight: '1.7'
           }}>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#123328', marginBottom: '1.5rem', textAlign: 'center', letterSpacing: '-0.02em' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '1.5rem', textAlign: 'center', letterSpacing: '-0.02em', fontFamily: "'Outfit', sans-serif" }}>
               Why Choose HRAllocate?
             </h2>
             <p style={{ color: '#475569', textAlign: 'center', marginBottom: '3.5rem', fontSize: '1.15rem', maxWidth: '700px', margin: '0 auto 4rem auto' }}>
@@ -719,9 +1070,9 @@ export default function PortalSelection() {
                   backgroundColor: '#ffffff',
                   border: '1px solid #cbd5e1',
                   borderRadius: '16px',
-                  boxShadow: 'var(--shadow-sm)'
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.01)'
                 }}>
-                  <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#123328', margin: '0 0 0.75rem 0' }}>{item.title}</h4>
+                  <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.75rem 0' }}>{item.title}</h4>
                   <p style={{ fontSize: '0.875rem', color: '#475569', margin: 0 }}>{item.desc}</p>
                 </div>
               ))}
@@ -735,7 +1086,7 @@ export default function PortalSelection() {
             margin: '0 auto',
             padding: '4rem 1.5rem'
           }}>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#123328', marginBottom: '1.5rem', textAlign: 'center', letterSpacing: '-0.02em' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '1.5rem', textAlign: 'center', letterSpacing: '-0.02em', fontFamily: "'Outfit', sans-serif" }}>
               Transparent Subscription Pricing
             </h2>
             <p style={{ color: '#475569', textAlign: 'center', marginBottom: '4rem', fontSize: '1.15rem' }}>
@@ -757,14 +1108,14 @@ export default function PortalSelection() {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                boxShadow: 'var(--shadow-sm)'
+                boxShadow: '0 4px 6px rgba(0,0,0,0.01)'
               }}>
                 <div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Self-Managed</span>
                   <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0.25rem 0 1rem 0' }}>Platform Services</h3>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '1.5rem' }}>
-                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#123328' }}>₹4,999</span>
-                    <span style={{ fontSize: '#64748b', fontSize: '0.85rem' }}>/ month</span>
+                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a' }}>₹4,999</span>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>/ month</span>
                   </div>
                   <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: '#475569', lineHeight: '2', marginBottom: '2rem' }}>
                     <li>Raise unlimited Client Tax Invoices</li>
@@ -776,8 +1127,8 @@ export default function PortalSelection() {
                 </div>
                 <button
                   onClick={() => setShowDemoModal(true)}
-                  style={{ width: '100%', padding: '0.75rem', border: '2px solid #123328', color: '#123328', backgroundColor: 'transparent', borderRadius: '30px', fontWeight: 700, cursor: 'pointer', transition: 'background-color 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0fdf4'}
+                  style={{ width: '100%', padding: '0.75rem', border: '2px solid #0047B8', color: '#0047B8', backgroundColor: 'transparent', borderRadius: '30px', fontWeight: 700, cursor: 'pointer', transition: 'background-color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0f6ff'}
                   onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   Start Platform Free Trial
@@ -786,24 +1137,24 @@ export default function PortalSelection() {
 
               {/* Plan 2 */}
               <div style={{
-                backgroundColor: '#123328',
+                backgroundColor: '#0b1d3a',
                 color: '#ffffff',
-                border: '1px solid #123328',
+                border: '1px solid #0b1d3a',
                 borderRadius: '24px',
                 padding: '2.5rem 2rem',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                boxShadow: '0 20px 25px -5px rgba(18, 51, 40, 0.15)'
+                boxShadow: '0 20px 25px -5px rgba(0, 71, 184, 0.1)'
               }}>
                 <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#a3e635', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Assistance</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Assistance</span>
                   <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', margin: '0.25rem 0 1rem 0' }}>Complete Payroll Service</h3>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '1.5rem' }}>
-                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#a3e635' }}>₹9,999</span>
-                    <span style={{ color: '#9fd3c4', fontSize: '0.85rem' }}>/ month</span>
+                    <span style={{ fontSize: '2rem', fontWeight: 800, color: '#93c5fd' }}>₹9,999</span>
+                    <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>/ month</span>
                   </div>
-                  <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: '#9fd3c4', lineHeight: '2', marginBottom: '2rem' }}>
+                  <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: '#cbd5e1', lineHeight: '2', marginBottom: '2rem' }}>
                     <li>Everything in Platform Services</li>
                     <li><strong>Assigned Chartered Accountant Firm</strong></li>
                     <li>Direct TDS Filing & Return Processing</li>
@@ -813,7 +1164,7 @@ export default function PortalSelection() {
                 </div>
                 <button
                   onClick={() => setShowDemoModal(true)}
-                  style={{ width: '100%', padding: '0.75rem', border: 'none', color: '#123328', backgroundColor: '#a3e635', borderRadius: '30px', fontWeight: 800, cursor: 'pointer', transition: 'transform 0.2s' }}
+                  style={{ width: '100%', padding: '0.75rem', border: 'none', color: '#ffffff', backgroundColor: '#0047B8', borderRadius: '30px', fontWeight: 800, cursor: 'pointer', transition: 'transform 0.2s' }}
                   onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                 >
@@ -830,7 +1181,7 @@ export default function PortalSelection() {
             margin: '0 auto',
             padding: '4rem 1.5rem'
           }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: themeBlue, marginBottom: '1.5rem', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: themeBlue, marginBottom: '1.5rem', textAlign: 'center', fontFamily: "'Outfit', sans-serif" }}>
               Our Platform Services
             </h2>
             <p style={{ color: '#475569', textAlign: 'center', marginBottom: '3rem', fontSize: '1.1rem' }}>
@@ -892,7 +1243,7 @@ export default function PortalSelection() {
             padding: '4rem 1.5rem',
             lineHeight: '1.7'
           }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: themeBlue, marginBottom: '1.5rem', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: themeBlue, marginBottom: '1.5rem', textAlign: 'center', fontFamily: "'Outfit', sans-serif" }}>
               About HR Allocate
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: '#475569' }}>
@@ -921,7 +1272,7 @@ export default function PortalSelection() {
             margin: '0 auto',
             padding: '4rem 1.5rem'
           }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: themeBlue, marginBottom: '1.5rem', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: themeBlue, marginBottom: '1.5rem', textAlign: 'center', fontFamily: "'Outfit', sans-serif" }}>
               Contact Us
             </h2>
             <p style={{ color: '#475569', textAlign: 'center', marginBottom: '2.5rem' }}>
