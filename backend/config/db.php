@@ -76,6 +76,46 @@ class Database {
             } catch (PDOException $ex) {
                 // ignore if already exists
             }
+            // Ensure onboarding-related tables exist (MySQL)
+            try {
+                self::$conn->exec("CREATE TABLE IF NOT EXISTS company_settings (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    company_id INT NOT NULL,
+                    setting_key VARCHAR(100) NOT NULL,
+                    setting_value TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY unique_company_setting (company_id, setting_key)
+                )");
+            } catch (PDOException $ex) { /* ignore */ }
+            try {
+                self::$conn->exec("CREATE TABLE IF NOT EXISTS departments (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    company_id INT NOT NULL,
+                    name VARCHAR(100) NOT NULL,
+                    code VARCHAR(20),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )");
+            } catch (PDOException $ex) { /* ignore */ }
+            try {
+                self::$conn->exec("CREATE TABLE IF NOT EXISTS designations (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    company_id INT NOT NULL,
+                    name VARCHAR(100) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )");
+            } catch (PDOException $ex) { /* ignore */ }
+            try {
+                self::$conn->exec("CREATE TABLE IF NOT EXISTS branches (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    company_id INT NOT NULL,
+                    name VARCHAR(100) NOT NULL,
+                    address TEXT,
+                    latitude DECIMAL(10,7) DEFAULT 0,
+                    longitude DECIMAL(10,7) DEFAULT 0,
+                    radius_meters INT DEFAULT 200,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )");
+            } catch (PDOException $ex) { /* ignore */ }
             return self::$conn;
         } catch (PDOException $e) {
             // If MySQL fails, fallback to local SQLite database in the backend directory
@@ -144,6 +184,46 @@ class Database {
                 } catch (PDOException $ex) {
                     // ignore if already exists
                 }
+                // Ensure onboarding-related tables exist (SQLite)
+                try {
+                    self::$conn->exec("CREATE TABLE IF NOT EXISTS company_settings (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        company_id INTEGER NOT NULL,
+                        setting_key TEXT NOT NULL,
+                        setting_value TEXT,
+                        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE(company_id, setting_key)
+                    )");
+                } catch (PDOException $ex) { /* ignore */ }
+                try {
+                    self::$conn->exec("CREATE TABLE IF NOT EXISTS departments (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        company_id INTEGER NOT NULL,
+                        name TEXT NOT NULL,
+                        code TEXT,
+                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                    )");
+                } catch (PDOException $ex) { /* ignore */ }
+                try {
+                    self::$conn->exec("CREATE TABLE IF NOT EXISTS designations (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        company_id INTEGER NOT NULL,
+                        name TEXT NOT NULL,
+                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                    )");
+                } catch (PDOException $ex) { /* ignore */ }
+                try {
+                    self::$conn->exec("CREATE TABLE IF NOT EXISTS branches (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        company_id INTEGER NOT NULL,
+                        name TEXT NOT NULL,
+                        address TEXT,
+                        latitude REAL DEFAULT 0,
+                        longitude REAL DEFAULT 0,
+                        radius_meters INTEGER DEFAULT 200,
+                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                    )");
+                } catch (PDOException $ex) { /* ignore */ }
 
                 return self::$conn;
             } catch (PDOException $sqliteEx) {
