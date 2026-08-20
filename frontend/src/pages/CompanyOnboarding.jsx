@@ -160,7 +160,9 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess, on
   // Auto-save draft on data changes
   const saveDraft = (updatedData) => {
     const dataToSave = updatedData || formData;
-    localStorage.setItem('company_onboarding_draft', JSON.stringify(dataToSave));
+    // Exclude large base64 image fields from localStorage to prevent payload bloat
+    const { company_logo, signature_image, company_seal, ...draftWithoutImages } = dataToSave;
+    localStorage.setItem('company_onboarding_draft', JSON.stringify(draftWithoutImages));
     localStorage.setItem('company_onboarding_step', currentStep.toString());
   };
 
@@ -245,20 +247,31 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess, on
     );
   };
 
-  // Base64 file uploader
+  // Compress + Base64 file uploader — resizes to max 800px, 70% JPEG quality
   const handleFileUpload = (e, field) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("File size exceeds 2MB limit!");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleInputChange(field, reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size exceeds 5MB limit. Please choose a smaller image.');
+      return;
     }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_W = 800;
+        const scale = img.width > MAX_W ? MAX_W / img.width : 1;
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressed = canvas.toDataURL('image/jpeg', 0.70);
+        handleInputChange(field, compressed);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   // Validations
