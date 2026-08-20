@@ -4384,7 +4384,9 @@ export default function HRDashboard({ token }) {
                             </div>
                             <div>
                               <div style={{ fontWeight: 700, color: '#334155' }}>
-                                {log.action} - <span style={{ fontWeight: 500, color: '#64748b' }}>{log.timestamp}</span>
+                                {log.action} - <span style={{ fontWeight: 500, color: '#64748b' }}>
+                                  {new Date(log.timestamp + (log.timestamp.includes('Z') || log.timestamp.includes('+') ? '' : ' UTC')).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })}
+                                </span>
                               </div>
                               <p style={{ color: '#64748b', margin: '0.15rem 0 0 0' }}>{log.remarks}</p>
                               <div style={{ display: 'flex', gap: '0.5rem', color: '#94a3b8', fontSize: '0.65rem', marginTop: '0.15rem' }}>
@@ -4406,8 +4408,8 @@ export default function HRDashboard({ token }) {
                       <LeafletMap 
                         officeLat={parseFloat(selectedRecord.record.office_lat || '12.9716')}
                         officeLng={parseFloat(selectedRecord.record.office_lng || '77.5946')}
-                        employeeLat={parseFloat(selectedRecord.record.clock_in_lat || '12.9716')}
-                        employeeLng={parseFloat(selectedRecord.record.clock_in_lng || '77.5946')}
+                        employeeLat={selectedRecord.record.clock_in_lat}
+                        employeeLng={selectedRecord.record.clock_in_lng}
                         radiusMeters={parseInt(selectedRecord.record.office_radius || '150')}
                       />
                     </div>

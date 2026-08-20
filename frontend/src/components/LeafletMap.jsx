@@ -38,8 +38,8 @@ export default function LeafletMap({ officeLat, officeLng, employeeLat, employee
     try {
       const oLat = parseFloat(officeLat || 12.9716);
       const oLng = parseFloat(officeLng || 77.5946);
-      const eLat = parseFloat(employeeLat || oLat);
-      const eLng = parseFloat(employeeLng || oLng);
+      const eLat = employeeLat ? parseFloat(employeeLat) : null;
+      const eLng = employeeLng ? parseFloat(employeeLng) : null;
 
       const map = L.map(mapContainerRef.current).setView([oLat, oLng], 15);
       mapInstanceRef.current = map;
@@ -64,7 +64,7 @@ export default function LeafletMap({ officeLat, officeLng, employeeLat, employee
       }).addTo(map);
 
       // Employee Marker (if checked in and valid coords)
-      if (employeeLat && employeeLng && (Math.abs(oLat - eLat) > 0.00001 || Math.abs(oLng - eLng) > 0.00001)) {
+      if (eLat !== null && eLng !== null) {
         L.marker([eLat, eLng], { icon: employeeIcon })
           .addTo(map)
           .bindPopup('<b>Clocking Location</b><br/>Verified coordinate checkpoint.')
