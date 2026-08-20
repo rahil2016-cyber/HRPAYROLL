@@ -14,3 +14,33 @@
   RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} !-f
   RewriteRule ^(.*)$ frontend/dist/index.html [L]
 </IfModule>
+
+# ── PHP upload & request size limits (Apache mod_php) ──────────────────────
+# Required for company onboarding which sends base64-encoded logo/seal images.
+<IfModule mod_php.c>
+  php_value post_max_size 32M
+  php_value upload_max_filesize 32M
+  php_value memory_limit 128M
+  php_value max_execution_time 120
+  php_value max_input_time 120
+</IfModule>
+<IfModule mod_php7.c>
+  php_value post_max_size 32M
+  php_value upload_max_filesize 32M
+  php_value memory_limit 128M
+  php_value max_execution_time 120
+  php_value max_input_time 120
+</IfModule>
+<IfModule mod_php8.c>
+  php_value post_max_size 32M
+  php_value upload_max_filesize 32M
+  php_value memory_limit 128M
+  php_value max_execution_time 120
+  php_value max_input_time 120
+</IfModule>
+
+# ── Apache request body limit (covers raw POST bodies) ─────────────────────
+# 33554432 = 32 MB in bytes
+<IfModule mod_setenvif.c>
+  LimitRequestBody 33554432
+</IfModule>

@@ -964,6 +964,7 @@ elseif ($action === 'onboarding/submit') {
 
     } catch (Exception $e) {
         $db->rollBack();
+        error_log('[HRAllocate][onboarding/submit] FAILED for company_id=' . ($company_id ?? 'unknown') . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
         hrResponse(500, ['error' => 'Failed to complete company onboarding', 'details' => $e->getMessage()]);
     }
 }

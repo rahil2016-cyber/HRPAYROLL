@@ -133,27 +133,32 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess, on
 
   // Load draft from localStorage on mount
   useEffect(() => {
-    const savedDraft = localStorage.getItem('company_onboarding_draft');
-    if (savedDraft) {
-      try {
-        const parsed = JSON.parse(savedDraft);
-        // Pre-populate fields but retain essential user settings if empty
+    // Always purge any stale large base64 images from old drafts first
+    try {
+      const rawDraft = localStorage.getItem('company_onboarding_draft');
+      if (rawDraft) {
+        const parsed = JSON.parse(rawDraft);
+        // IMPORTANT: never restore image blobs from localStorage — they can
+        // be multi-MB and cause 413 errors when the form is submitted.
+        // eslint-disable-next-line no-unused-vars
+        const { company_logo, signature_image, company_seal, ...safeFields } = parsed;
         setFormData(prev => ({
           ...prev,
-          ...parsed,
-          company_name: parsed.company_name || prev.company_name,
-          official_email: parsed.official_email || prev.official_email,
-          admin_name: parsed.admin_name || prev.admin_name,
-          admin_email: parsed.admin_email || prev.admin_email
+          ...safeFields,
+          company_name: safeFields.company_name || prev.company_name,
+          official_email: safeFields.official_email || prev.official_email,
+          admin_name: safeFields.admin_name || prev.admin_name,
+          admin_email: safeFields.admin_email || prev.admin_email
         }));
-        
+        // Re-save the draft without the images so old data is cleaned up
+        localStorage.setItem('company_onboarding_draft', JSON.stringify(safeFields));
+
         const savedStep = localStorage.getItem('company_onboarding_step');
-        if (savedStep) {
-          setCurrentStep(parseInt(savedStep) || 1);
-        }
-      } catch (e) {
-        console.error("Failed to load onboarding draft", e);
+        if (savedStep) setCurrentStep(parseInt(savedStep) || 1);
       }
+    } catch (e) {
+      console.error('Failed to load onboarding draft', e);
+      localStorage.removeItem('company_onboarding_draft');
     }
   }, []);
 
@@ -338,11 +343,46 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess, on
     localStorage.setItem('company_onboarding_step', prev.toString());
   };
 
+  // Helper: compress a base64 image down to a JPEG at max maxKB kilobytes.
+  // Returns null if the input is empty/invalid.
+  const compressImageToLimit = (dataUrl, maxKB = 150) => {
+    return new Promise((resolve) => {
+      if (!dataUrl || !dataUrl.startsWith('data:')) { resolve(null); return; }
+      // Already within limit — skip re-encoding
+      const approxKB = Math.round((dataUrl.length * 3) / 4 / 1024);
+      if (approxKB <= maxKB) { resolve(dataUrl); return; }
+      const img = new Image();
+      img.onload = () => {
+        let quality = 0.7;
+        let scale = 1;
+        // Progressively shrink until under limit
+        const tryEncode = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          const result = canvas.toDataURL('image/jpeg', quality);
+          const kb = Math.round((result.length * 3) / 4 / 1024);
+          if (kb <= maxKB || (quality <= 0.3 && scale <= 0.3)) {
+            resolve(result);
+          } else {
+            if (quality > 0.3) quality = Math.max(0.3, quality - 0.15);
+            else scale = Math.max(0.3, scale - 0.15);
+            tryEncode();
+          }
+        };
+        tryEncode();
+      };
+      img.onerror = () => resolve(null);
+      img.src = dataUrl;
+    });
+  };
+
   const handleSubmit = async () => {
     // Validate Step 9 errors
     const errors = getValidationErrors(9);
     if (Object.keys(errors).length > 0) {
-      alert("Please fix validation errors in Step 9: First Admin Account before submitting.");
+      alert('Please fix validation errors in Step 9: First Admin Account before submitting.');
       return;
     }
 
@@ -350,23 +390,58 @@ export default function CompanyOnboarding({ token, user, onOnboardingSuccess, on
     setApiError(null);
 
     try {
-      const response = await axios.post(window.API_BASE_URL + '/index.php?route=/api/hr/onboarding/submit', formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Build a lean payload — compress all image fields to ≤150 KB each
+      const [logoCompressed, sigCompressed, sealCompressed] = await Promise.all([
+        compressImageToLimit(formData.company_logo, 150),
+        compressImageToLimit(formData.signature_image, 150),
+        compressImageToLimit(formData.company_seal, 150)
+      ]);
+
+      // Build payload excluding password_confirm and any unexpected blob data
+      // eslint-disable-next-line no-unused-vars
+      const { admin_confirm_password, ...rest } = formData;
+      const payload = {
+        ...rest,
+        company_logo: logoCompressed || '',
+        signature_image: sigCompressed || '',
+        company_seal: sealCompressed || ''
+      };
+
+      // Debug: log approximate payload size
+      const payloadStr = JSON.stringify(payload);
+      const approxKB = Math.round(payloadStr.length / 1024);
+      console.info(`[Onboarding] Submitting payload ~${approxKB} KB`);
+      if (approxKB > 4096) {
+        console.warn('[Onboarding] Payload exceeds 4 MB — submission may be rejected by server.');
+      }
+
+      const response = await axios.post(
+        window.API_BASE_URL + '/index.php?route=/api/hr/onboarding/submit',
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       if (response.data.token) {
         setSuccess(true);
-        // Clean up localStorage drafts
         localStorage.removeItem('company_onboarding_draft');
         localStorage.removeItem('company_onboarding_step');
-
-        // Short timeout for gorgeous success animation
         setTimeout(() => {
           onOnboardingSuccess(response.data.token, response.data.user);
         }, 2500);
       }
     } catch (err) {
-      setApiError(err.response?.data?.error || err.response?.data?.details || 'Failed to complete company onboarding. Please try again.');
+      const status = err.response?.status;
+      if (status === 413) {
+        setApiError(
+          'Your submission is too large (413). Please remove any logo or document uploads from the Branding step, then try again. If the issue persists, contact your administrator.'
+        );
+      } else {
+        setApiError(
+          err.response?.data?.error ||
+          err.response?.data?.details ||
+          'Failed to complete company onboarding. Please try again.'
+        );
+      }
     } finally {
       setLoading(false);
     }
