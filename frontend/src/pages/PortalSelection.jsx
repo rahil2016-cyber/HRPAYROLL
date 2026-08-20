@@ -22,14 +22,13 @@ import {
 
 export default function PortalSelection() {
   const navigate = useNavigate();
-  const [hoveredCard, setHoveredCard] = useState(null);
   const [isHoveredDashboard, setIsHoveredDashboard] = useState(false);
-  const [activeTab, setActiveTab] = useState('home'); // home, services, pricing, about, contact
+  const [activeTab, setActiveTab] = useState('home');
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showDemoModal, setShowDemoModal] = useState(false);
-  
-  // Feature tab showcase state
-  const [activeFeatureTab, setActiveFeatureTab] = useState('salary'); // salary, compliance, employee, partner
+  const [activeFeatureTab, setActiveFeatureTab] = useState('salary');
+  const [hoveredStep, setHoveredStep] = useState(null);
+  const [hoveredStat, setHoveredStat] = useState(null);
 
   const [demoForm, setDemoForm] = useState({
     name: '',
@@ -42,46 +41,13 @@ export default function PortalSelection() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
-  // Original colors
   const themeBlue = '#0047B8';
   const themeLightBlue = '#e0f2fe';
   const themeDarkBlue = '#0b1d3a';
-
-  // Zoho-inspired accent palette (used for badges, bullets, and highlights)
   const zohoRed = '#E42527';
   const zohoGreen = '#089949';
   const zohoBlue = '#226DB4';
   const zohoYellow = '#F9B21D';
-
-  const portals = [
-    {
-      id: 'hr',
-      title: 'Hire Portal',
-      subtitle: '01',
-      description: 'Manage employee onboarding, geofenced tracking, and team attendance.',
-      icon: MdBusiness,
-      route: '/login/hr',
-      color: zohoRed
-    },
-    {
-      id: 'finance',
-      title: 'Pay Portal',
-      subtitle: '02',
-      description: 'Automate salary calculation, statutory deductions, tax returns, and payslips.',
-      icon: MdAttachMoney,
-      route: '/login/finance',
-      color: zohoGreen
-    },
-    {
-      id: 'employee',
-      title: 'Manage Portal',
-      subtitle: '03',
-      description: 'Check payslips, submit leaves, and verify attendance records easily.',
-      icon: MdPeople,
-      route: '/login/employee',
-      color: zohoBlue
-    }
-  ];
 
   const handleDemoSubmit = async (e) => {
     e.preventDefault();
@@ -224,15 +190,11 @@ export default function PortalSelection() {
           {/* CTAs */}
           <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center' }}>
             <button
-              onClick={() => {
-                const el = document.getElementById('gateways');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-                else setActiveTab('home');
-              }}
+              onClick={() => setShowDemoModal(true)}
               style={{
                 backgroundColor: 'transparent',
-                color: '#475569',
-                border: '1.5px solid #cbd5e1',
+                color: themeBlue,
+                border: `1.5px solid ${themeBlue}`,
                 padding: '0.55rem 1.25rem',
                 borderRadius: '6px',
                 fontSize: '0.85rem',
@@ -240,10 +202,10 @@ export default function PortalSelection() {
                 cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = themeBlue; e.currentTarget.style.color = themeBlue; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#475569'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#e6f0ff'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
-              Sign In Portals
+              Request a Demo
             </button>
             
             <button
@@ -262,7 +224,7 @@ export default function PortalSelection() {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#c51d20'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = zohoRed}
             >
-              Book a Free Demo
+              Get Started Free
             </button>
           </div>
         </div>
@@ -499,112 +461,275 @@ export default function PortalSelection() {
               </div>
             </section>
 
-            {/* Portal Selection Gateways: 3 Columns Grid */}
-            <section id="gateways" style={{
+            {/* ── Trust Stats Bar ── */}
+            <section style={{
+              background: '#ffffff',
+              borderTop: '1px solid #f1f5f9',
+              borderBottom: '1px solid #f1f5f9',
+              padding: '0 1.5rem'
+            }}>
+              <div style={{
+                maxWidth: '1100px',
+                margin: '0 auto',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '0'
+              }}>
+                {[
+                  { value: '2,000+', label: 'Companies Trust Us', icon: '🏢', accent: zohoBlue },
+                  { value: '₹50 Cr+', label: 'Payroll Processed Monthly', icon: '💰', accent: zohoGreen },
+                  { value: '100%', label: 'Tax Compliance Rate', icon: '🛡️', accent: zohoRed },
+                  { value: '15 Min', label: 'Average Setup Time', icon: '⚡', accent: zohoYellow }
+                ].map((stat, i) => (
+                  <div
+                    key={i}
+                    onMouseEnter={() => setHoveredStat(i)}
+                    onMouseLeave={() => setHoveredStat(null)}
+                    style={{
+                      padding: '2.5rem 2rem',
+                      borderRight: i < 3 ? '1px solid #f1f5f9' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      transition: 'background 0.2s',
+                      background: hoveredStat === i ? '#f8fafc' : 'transparent',
+                      cursor: 'default'
+                    }}
+                  >
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '12px',
+                      backgroundColor: stat.accent + '18',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.4rem',
+                      flexShrink: 0
+                    }}>
+                      {stat.icon}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1.6rem', fontWeight: 800, color: themeDarkBlue, lineHeight: 1 }}>
+                        {stat.value}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem', fontWeight: 500 }}>
+                        {stat.label}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── How It Works — 3 Step Process ── */}
+            <section style={{
               maxWidth: '1200px',
               margin: '0 auto',
-              padding: '6rem 1.5rem 5rem 1.5rem'
+              padding: '7rem 1.5rem 6rem'
             }}>
-              <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                <span style={{ color: themeBlue, fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  SECURE ACCESS GATEWAYS
+              <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                <span style={{
+                  color: zohoBlue,
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  display: 'inline-block',
+                  backgroundColor: '#e6f0ff',
+                  padding: '0.3rem 0.9rem',
+                  borderRadius: '20px',
+                  marginBottom: '1rem'
+                }}>
+                  HOW IT WORKS
                 </span>
-                <h2 style={{ fontSize: '2.1rem', fontWeight: 800, color: themeDarkBlue, marginTop: '0.5rem' }}>
-                  Log in to your respective portal to manage operations
+                <h2 style={{
+                  fontSize: '2.3rem',
+                  fontWeight: 800,
+                  color: themeDarkBlue,
+                  margin: '0 0 1rem 0',
+                  letterSpacing: '-0.02em'
+                }}>
+                  Up and running in three simple steps
                 </h2>
-                <p style={{ color: '#64748b', fontSize: '0.95rem', marginTop: '0.25rem' }}>
-                  Please select your role from the modules below to access the secure login gateway.
+                <p style={{ color: '#64748b', fontSize: '1rem', maxWidth: '560px', margin: '0 auto', lineHeight: 1.6 }}>
+                  From onboarding your team to filing your taxes — HR Allocate takes care of it all, automatically.
                 </p>
               </div>
 
+              {/* Steps */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '2rem'
+                gap: '2rem',
+                position: 'relative'
               }}>
-                {portals.map((portal, index) => {
-                  const Icon = portal.icon;
-                  const isHovered = hoveredCard === index;
-
+                {[
+                  {
+                    step: '01',
+                    icon: MdBusiness,
+                    title: 'Onboard Your Company',
+                    desc: 'Set up your organization profile, add branches, configure salary structures, and invite your HR team — all in under 15 minutes.',
+                    highlights: ['Branch & department setup', 'Role & permission management', 'Salary template configuration'],
+                    accent: zohoRed,
+                    bg: '#fff5f5'
+                  },
+                  {
+                    step: '02',
+                    icon: MdPeople,
+                    title: 'Manage Your Workforce',
+                    desc: 'Add employees, enable GPS geofenced attendance, configure AI face verification, and track leaves with automated balance management.',
+                    highlights: ['GPS geofence check-in/out', 'AI face liveness verification', 'Leave approvals & tracking'],
+                    accent: zohoBlue,
+                    bg: '#f0f6ff'
+                  },
+                  {
+                    step: '03',
+                    icon: MdReceiptLong,
+                    title: 'Run Payroll Automatically',
+                    desc: 'Generate salary drafts, calculate EPF, ESI, TDS deductions automatically, distribute payslips, and file statutory returns.',
+                    highlights: ['One-click payroll generation', 'Auto EPF / ESI / PT / TDS', 'Payslip distribution & filing'],
+                    accent: zohoGreen,
+                    bg: '#f0fdf4'
+                  }
+                ].map((item, i) => {
+                  const Icon = item.icon;
+                  const isH = hoveredStep === i;
                   return (
                     <div
-                      key={portal.id}
-                      onClick={() => navigate(portal.route)}
-                      onMouseEnter={() => setHoveredCard(index)}
-                      onMouseLeave={() => setHoveredCard(null)}
+                      key={i}
+                      onMouseEnter={() => setHoveredStep(i)}
+                      onMouseLeave={() => setHoveredStep(null)}
                       style={{
-                        backgroundColor: '#ffffff',
-                        border: `1.5px solid ${isHovered ? themeBlue : '#e2e8f0'}`,
-                        borderRadius: '8px',
+                        backgroundColor: isH ? item.bg : '#ffffff',
+                        border: `1.5px solid ${isH ? item.accent : '#e8ecf0'}`,
+                        borderRadius: '16px',
                         padding: '2.5rem 2rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                        transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
-                        boxShadow: isHovered ? '0 12px 25px rgba(0, 71, 184, 0.06)' : '0 4px 6px rgba(0,0,0,0.01)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        minHeight: '220px',
-                        position: 'relative'
+                        transition: 'all 0.3s ease',
+                        transform: isH ? 'translateY(-6px)' : 'translateY(0)',
+                        boxShadow: isH ? `0 16px 40px ${item.accent}18` : '0 2px 8px rgba(0,0,0,0.03)',
+                        position: 'relative',
+                        overflow: 'hidden'
                       }}
                     >
-                      <div>
-                        {/* Colorful header line */}
-                        <div style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          height: '4px',
-                          backgroundColor: portal.color,
-                          borderRadius: '8px 8px 0 0'
-                        }} />
+                      {/* Step number watermark */}
+                      <span style={{
+                        position: 'absolute',
+                        top: '1rem',
+                        right: '1.5rem',
+                        fontSize: '4.5rem',
+                        fontWeight: 900,
+                        color: item.accent + '10',
+                        lineHeight: 1,
+                        userSelect: 'none',
+                        fontFamily: "'Outfit', sans-serif"
+                      }}>
+                        {item.step}
+                      </span>
 
-                        {/* Icon Container */}
-                        <div style={{
-                          width: '46px',
-                          height: '46px',
-                          borderRadius: '6px',
-                          backgroundColor: isHovered ? portal.color : '#f8fafc',
-                          color: isHovered ? '#ffffff' : themeBlue,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginBottom: '1.5rem',
-                          transition: 'all 0.2s'
-                        }}>
-                          <Icon size={24} />
-                        </div>
-
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: themeDarkBlue, marginBottom: '0.65rem' }}>
-                          {portal.title}
-                        </h3>
-
-                        <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>
-                          {portal.description}
-                        </p>
-                      </div>
-
+                      {/* Icon */}
                       <div style={{
+                        width: '52px',
+                        height: '52px',
+                        borderRadius: '14px',
+                        backgroundColor: item.accent + '18',
+                        color: item.accent,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        marginTop: '1.5rem'
+                        justifyContent: 'center',
+                        marginBottom: '1.75rem',
+                        transition: 'all 0.2s',
+                        ...(isH ? { backgroundColor: item.accent, color: '#ffffff' } : {})
                       }}>
-                        <span style={{
-                          fontSize: '0.85rem',
-                          color: themeBlue,
-                          fontWeight: 700,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.25rem'
-                        }}>
-                          Access Gate <MdArrowRightAlt size={18} />
-                        </span>
+                        <Icon size={26} />
+                      </div>
+
+                      {/* Step badge */}
+                      <span style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        color: item.accent,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                        display: 'block',
+                        marginBottom: '0.5rem'
+                      }}>
+                        Step {item.step}
+                      </span>
+
+                      <h3 style={{
+                        fontSize: '1.25rem',
+                        fontWeight: 800,
+                        color: themeDarkBlue,
+                        marginBottom: '0.85rem',
+                        lineHeight: 1.3
+                      }}>
+                        {item.title}
+                      </h3>
+
+                      <p style={{
+                        color: '#475569',
+                        fontSize: '0.88rem',
+                        lineHeight: 1.65,
+                        marginBottom: '1.5rem'
+                      }}>
+                        {item.desc}
+                      </p>
+
+                      {/* Highlights */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {item.highlights.map((hl, j) => (
+                          <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#334155' }}>
+                            <div style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '50%',
+                              backgroundColor: item.accent + '22',
+                              color: item.accent,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.6rem',
+                              fontWeight: 800,
+                              flexShrink: 0
+                            }}>
+                              ✓
+                            </div>
+                            {hl}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   );
                 })}
+              </div>
+
+              {/* CTA row */}
+              <div style={{ textAlign: 'center', marginTop: '3.5rem' }}>
+                <button
+                  onClick={() => setShowDemoModal(true)}
+                  style={{
+                    backgroundColor: themeBlue,
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '1rem 2.5rem',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#003bab'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = themeBlue}
+                >
+                  Start Your Free Setup <MdArrowForward size={18} />
+                </button>
+                <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '0.75rem' }}>
+                  No credit card required · Cancel anytime · Indian tax compliant
+                </p>
               </div>
             </section>
 
