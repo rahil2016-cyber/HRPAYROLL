@@ -135,22 +135,13 @@ export default function PortalSelection() {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          {/* Zoho-styled Logo with colors */}
-          <div 
+          {/* Official HR Allocate Brand Logo */}
+          <div
             onClick={() => setActiveTab('home')}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }}
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            title="HR Allocate — Home"
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2px', width: '18px' }}>
-              <span className="zoho-logo-tile" style={{ backgroundColor: zohoRed }} />
-              <span className="zoho-logo-tile" style={{ backgroundColor: zohoBlue }} />
-              <span className="zoho-logo-tile" style={{ backgroundColor: zohoYellow }} />
-              <span className="zoho-logo-tile" style={{ backgroundColor: zohoGreen }} />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2' + 'rem', fontFamily: "'Outfit', sans-serif", fontSize: '1.35rem', fontWeight: 800 }}>
-              <span style={{ color: themeBlue }}>HR</span>
-              <span style={{ color: themeDarkBlue }}>Allocate</span>
-              <span style={{ fontSize: '0.75rem', backgroundColor: '#e0f2fe', color: themeBlue, padding: '0.1rem 0.4rem', borderRadius: '4px', marginLeft: '0.35rem', fontWeight: 600 }}>Payroll</span>
-            </div>
+            <Logo height={46} />
           </div>
 
           {/* Clean Navigation Options */}
@@ -1270,15 +1261,7 @@ export default function PortalSelection() {
           alignItems: 'center',
           gap: '1rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1px', width: '12px' }}>
-              <span style={{ width: '5px', height: '5px', borderRadius: '1px', backgroundColor: zohoRed }} />
-              <span style={{ width: '5px', height: '5px', borderRadius: '1px', backgroundColor: zohoBlue }} />
-              <span style={{ width: '5px', height: '5px', borderRadius: '1px', backgroundColor: zohoYellow }} />
-              <span style={{ width: '5px', height: '5px', borderRadius: '1px', backgroundColor: zohoGreen }} />
-            </div>
-            <strong style={{ fontSize: '0.9rem', color: themeDarkBlue }}>HR Allocate</strong>
-          </div>
+          <Logo height={40} />
           <p style={{ color: '#64748b', fontSize: '0.8rem', margin: 0 }}>
             &copy; {new Date().getFullYear()} HR Allocate. All rights reserved. Registered Indian Payroll Platform.
           </p>
